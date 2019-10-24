@@ -33,6 +33,7 @@ class HostapdIF : public ACE_Task<ACE_MT_SYNC>
     ACE_UNIX_Addr        m_unixAddr;
     ACE_INET_Addr        m_addr;
     ACE_LSOCK_Connector  m_connector; 
+    ACE_SOCK_Dgram       m_sockDgram;
 };
 
 #endif /*__HOSTAPD_IF_H__*/

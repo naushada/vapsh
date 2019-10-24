@@ -10,7 +10,16 @@ int HostapdIF::init(char *path)
   m_addr.set(9877);
   /*Creating Unix Socket*/
   m_unixAddr.set("/var/run/hostapd");
- 
+
+  /**/
+  m_lsockDgram.set(m_unixAddr);
+  m_lsockDgram.open();
+
+  /**/
+  m_sockDgram.set(m_addr);
+  m_sockDgram.open();
+
+  ACE_Reactor::instance()->register_event(this, ACE_ 
 }
 
 HostapdIF::HostapdIF(ReadlineIF *pReadlineIF)
