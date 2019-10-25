@@ -290,13 +290,6 @@ char *ReadlineIF::stripwhite (char *string)
   return s;
 }
 
-int main()
-{
-  ReadlineIF *cmdAgent = new ReadlineIF();
-
-  
-}
-
 int ReadlineIF::executeLine(char *line)
 {
   int i;
@@ -338,14 +331,14 @@ int ReadlineIF::executeLine(char *line)
   }
 }
 
-void ReadlineIF::hostapdIF(hostapdIF *hostapdIF)
+void ReadlineIF::hostapdIF(hostapdTask *hostapdTask)
 {
-  m_hostapdIF = hostapdIF;
+  m_hostapdTask = hostapdTask;
 }
 
-HostapdIF *ReadlineIF::hostapdIF(void)
+HostapdTask *ReadlineIF::hostapdTask(void)
 {
-  return(m_hostapdIF);
+  return(m_hostapdTask);
 }
 
 /* Print out help for cmd, or for all of the commands if cmd is
