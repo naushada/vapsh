@@ -4,25 +4,92 @@
 #include "readlineIF.h"
 #include "hostapdIF.h"
 
-int HostapdIF::init(char *path)
+int HostapdCtrlIF::main(int argc, char *argv[])
 {
-  /*hostapd accepts request on port 9877 for control interface message.*/
-  m_addr.set(9877);
-  /*Creating Unix Socket*/
-  m_unixAddr.set("/var/run/hostapd");
 
-  /**/
-  m_lsockDgram.set(m_unixAddr);
-  m_lsockDgram.open();
+  
+  HostapdTask *instance = new HostapdTask(new ReadlineIF(), this);
+  
+  while(1)
+  {  
+    ACE_Reactor::instance()->handle_events();
+  }
 
-  /**/
-  m_sockDgram.set(m_addr);
-  m_sockDgram.open();
+  return(0);
+}
+/*
+ * @brief  This is the hook method for application to define this member function and is invoked by 
+ *         ACE Framework.
+ * @param  handle in which read/recv/recvfrom to be called.
+ * @return 0 for success else for failure.
+ */
+int HostapdCtrlIF::handle_input(ACE_HANDLE handle)
+{
+  if(HostapdCtrlIF::UNIX == ctrlIntfType())
+  {
+    /*UNIX socket for IPC.*/  
+  }
+  else if(HostapdCtrlIF::UDP ==  ctrlIntfType())
+  {
+    /*UDP socket for IPC.*/
+  }
+  else
+  {
+    /*TCP socket for IPC.*/
+  }
 
-  ACE_Reactor::instance()->register_event(this, ACE_ 
+  return(0);
 }
 
-HostapdIF::HostapdIF(ReadlineIF *pReadlineIF)
+/*
+ * @brief  This is the hook method of ACE Event Handler and is called by ACE Framework to retrieve the
+ *         handle. The handle is nothing but it's fd - file descriptor.
+ * @param  none
+ * @return handle of type ACE_HANDLE
+ */
+ACE_HANDLE HostapdCtrlIF::get_handle(void) const
+{
+  return(handle());
+}
+
+ACE_HANDLE HostapdCtrlIF::handle(void)
+{
+  return(m_handle);  
+}
+
+void HostapdCtrlIF::handle(ACE_HANDLE handle)
+{
+  m_handle = handle;  
+}
+
+HostapdCtrlIF::HostapdCtrlIF(CtrlIntfType_t ctrlIFType)
+{
+  ctrlIntfType(ctrlIFType);
+  
+  if(HostapdCtrlIF::UNIX == ctrlIFType)
+  {
+    m_unixAddr.set("/var/run/hostapd");
+    m_unixDgram.set(m_unixAddr);
+    m_unixDgram.open();
+    handle(m_unixDgram.get_handle());
+    ACE_Reactor::instance()->register_handler(this, ACE_Event_Handler::READ_MASK);
+  }
+  else if(HostapdCtrlIF::UDP == ctrlIFType)
+  {
+    m_addr.set(9877);
+    m_sockDgram.set(m_addr);
+    m_sockDgram.open();
+    handle(m_sockDgram.get_handle());
+    ACE_Reactor::instance()->register_handler(this, ACE_Event_Handle::READ_MASK);
+  }
+  else
+  {
+    /*To be added for TCP.*/
+  }
+}
+
+/*HostapdTask Class Definition...*/
+HostapdTask::HostapdTask(ReadlineIF *pReadlineIF, HostapdCtrlIF *pCtrlIF)
 {
   do 
   {
@@ -33,15 +100,21 @@ HostapdIF::HostapdIF(ReadlineIF *pReadlineIF)
       break;
     }
 
-    readlineIF()->hostapdIF(this);
+    hostapdCtrlIF(pCtrlIF);
+    if(!hostapdCtrlIF())
+    {
+      ACE_ERROR((LM_ERROR, "Ppointer to hostapdCtrlIF is NULL\n"));
+      break;
+    }
+    
+    readlineIF()->hostapdTask(this);
     readlineIF()->init();
     open();
 
   }while(0);
-
 }
 
-int HostapdIF::open(void)
+int HostapdTask::open(void)
 {
   /*Make this object as an Active Object.*/
   activate(THR_NEW_LWP, 1);
@@ -49,7 +122,7 @@ int HostapdIF::open(void)
 }
 
 
-int HostapdIF::svc(void)
+int HostapdTask::svc(void)
 {
   /*readline completer is bind successfully.*/
 
@@ -75,21 +148,9 @@ int HostapdIF::svc(void)
     free (line);
   }
 
-  exit (0);
+  exit(0);
 }
 
-int HostapdIF::main(int argc, char *argv[])
-{
 
-  HostapdIF *instance = new HostapdIF(new ReadlineIF());
-  
-
-  return(1);
-}
-
-ACE_HANDLE HostapdIF::get_handle() const
-{
-  return(m_handle);
-}
 
 #endif /*__HOSTAPD_AGENT_CC__*/
