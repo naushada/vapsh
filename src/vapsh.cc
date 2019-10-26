@@ -6,10 +6,10 @@
 
 int main(int argc, char *argv[])
 {
-  HostapdCtrlIF instance = new HostapdCtrlIF();
-  instance->createSockIF(HostapdCtrlIF::UNIX);
+  HostapdCtrlIF instance = new HostapdCtrlIF(HostapdCtrlIF::UNIX);
   instance->main(argc, argv);
 
+  delete instance;
   return(0);
 }
 

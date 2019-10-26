@@ -6,17 +6,18 @@
 
 int HostapdCtrlIF::main(int argc, char *argv[])
 {
-
-  
-  HostapdTask *instance = new HostapdTask(new ReadlineIF(), this);
+  ReadlineIF *readlineIF = new ReadlineIF();
+  HostapdTask *instance  = new HostapdTask(readlineIF, this);
   
   while(1)
   {  
     ACE_Reactor::instance()->handle_events();
   }
 
+  delete readlineIF;
   return(0);
 }
+
 /*
  * @brief  This is the hook method for application to define this member function and is invoked by 
  *         ACE Framework.

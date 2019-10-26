@@ -1,8 +1,8 @@
 #ifndef __HOSTAPD_IF_H__
 #define __HOSTAPD_IF_H__
 
-#include "ace/ACE_Event_Handler.h"
-#include "ace/ACE_Task.h"
+#include <ace/Event_Handler.h>
+#include <ace/Task.h>
 
 class HostapdCtrlIF : public ACE_EVENT_Handler
 {
@@ -52,8 +52,8 @@ class HostapdTask : public ACE_Task<ACE_MT_SYNC>
     HostapdCtrlIF *hostapdCtrlIF(void);
 
   private:
-    ReadlineIF          *m_readlineIF;
-    HostapdCtrlIF       *m_hostapdCtrlIF;
+    ReadlineIF    *m_readlineIF;
+    HostapdCtrlIF *m_hostapdCtrlIF;
     
 };
 

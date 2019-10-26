@@ -226,8 +226,8 @@ char **ReadlineIF::commandCompletion(char *text, int start, int end)
   /* If this word is at the start of the line, then it is a command
      to complete.  Otherwise it is the name of a file in the current
      directory. */
-  if (start == 0)
-    matches = completion_matches (text, commandGenerator);
+  if(start == 0)
+    matches = completion_matches(text, commandGenerator);
 
   return (matches);
 }
@@ -239,13 +239,18 @@ int ReadlineIF::init(void)
   return(1);
 }
 
+virtual ReadlineIF::~ReadlineIF()
+{
+  delete m_prompt;
+}
+
 ReadlineIF::ReadlineIF()
 {
-  m_prompt = NULL;
-  m_offset = 0;
-  m_len = 0;
+  m_prompt         = NULL;
+  m_offset         = 0;
+  m_len            = 0;
   m_continueStatus = false;
-  m_hostapdIF = NULL;
+  m_hostapdTask    = NULL;
 }
 
 /* Look up NAME as the name of a command, and return a pointer to that
@@ -331,7 +336,7 @@ int ReadlineIF::executeLine(char *line)
   }
 }
 
-void ReadlineIF::hostapdIF(hostapdTask *hostapdTask)
+void ReadlineIF::hostapdTask(hostapdTask *hostapdTask)
 {
   m_hostapdTask = hostapdTask;
 }
@@ -400,6 +405,7 @@ bool ReadlineIF::continueStatus(void)
 
 int ReadlineIF::processCommand(char *cmd, int len)
 {
+  printf("The Command is %s\n", cmd);
   return(0);
 }
 
