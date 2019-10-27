@@ -1,18 +1,31 @@
 #ifndef __HOSTAPD_IF_H__
 #define __HOSTAPD_IF_H__
 
+#include <ace/Reactor.h>
+#include <ace/Basic_Types.h>
 #include <ace/Event_Handler.h>
 #include <ace/Task.h>
+#include <ace/INET_Addr.h>
+#include <ace/UNIX_Addr.h>
+#include <ace/SOCK_Dgram.h>
+#include <ace/LSOCK_Dgram.h>
+#include <ace/Task_T.h>
+#include <ace/UNIX_Addr.h>
 
-class HostapdCtrlIF : public ACE_EVENT_Handler
+#include "readlineIF.h"
+
+/*Forward Declaration...*/
+class HostapdTask;
+
+class HostapdCtrlIF : public ACE_Event_Handler
 {
   public:
     virtual int handle_input(ACE_HANDLE handle = ACE_INVALID_HANDLE);
     virtual ACE_HANDLE get_handle(void) const;
-    HostapdCtrlIF(int ctrlIFType);
     HostapdCtrlIF();
     virtual ~HostapdCtrlIF();
     enum CtrlIntfType_t {UNIX, UDP, TCP};
+    HostapdCtrlIF(CtrlIntfType_t ctrlIFType);
     void handle(ACE_HANDLE handle);
     ACE_HANDLE handle(void);
     void ctrlIntfType(CtrlIntfType_t ctrlIFType);
@@ -25,16 +38,15 @@ class HostapdCtrlIF : public ACE_EVENT_Handler
     ACE_INET_Addr       m_addr;
     ACE_SOCK_Dgram      m_sockDgram;
     ACE_LSOCK_Dgram     m_unixDgram;
-    ACE_LSOCK_Connector m_conector;
     CtrlIntfType_t      m_ctrlIntfType;
     HostapdTask         *m_hostapdTask;
     
 };
 
-class HostapdTask : public ACE_Task<ACE_MT_SYNC>
+class HostapdTask : public ACE_Task<ACE_MT_SYNCH>
 {
   public:
-    virtual int open(void *= 0); 
+    virtual int open(void *args=0); 
     virtual int svc(void);
     virtual int wait();
     virtual int suspend(void);
@@ -43,7 +55,9 @@ class HostapdTask : public ACE_Task<ACE_MT_SYNC>
     virtual int close(u_long flags=0);
     virtual int put(ACE_Message_Block *mb, ACE_Time_Value *to=0);
 
-    HostapdTask(ReadlineIF *pReadlineIF, HostapdCtrlIF *pCtrlIF);
+    HostapdTask(ReadlineIF *pReadlineIF, 
+                HostapdCtrlIF *pCtrlIF);
+
     HostapdTask();
     virtual ~HostapdTask();
     void readlineIF(ReadlineIF *pReadlineIF);

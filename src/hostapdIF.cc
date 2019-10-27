@@ -1,5 +1,8 @@
 #ifndef __HOSTAPD_IF_CC__
 #define __HOSTAPD_IF_CC__
+#include <stdio.h>
+#include <string.h>
+#include <stdlib.h>
 
 #include "readlineIF.h"
 #include "hostapdIF.h"
@@ -50,7 +53,7 @@ int HostapdCtrlIF::handle_input(ACE_HANDLE handle)
  */
 ACE_HANDLE HostapdCtrlIF::get_handle(void) const
 {
-  return(handle());
+  return(const_cast<HostapdCtrlIF *>(this)->handle());
 }
 
 ACE_HANDLE HostapdCtrlIF::handle(void)
@@ -70,34 +73,36 @@ HostapdCtrlIF::HostapdCtrlIF(CtrlIntfType_t ctrlIFType)
   if(HostapdCtrlIF::UNIX == ctrlIFType)
   {
     m_unixAddr.set("/var/run/hostapd");
-    m_unixDgram.set(m_unixAddr);
-    m_unixDgram.open();
+    //m_unixDgram.set(m_unixAddr);
+    m_unixDgram.open(m_unixAddr);
     handle(m_unixDgram.get_handle());
     ACE_Reactor::instance()->register_handler(this, ACE_Event_Handler::READ_MASK);
   }
   else if(HostapdCtrlIF::UDP == ctrlIFType)
   {
     m_addr.set(9877);
-    m_sockDgram.set(m_addr);
-    m_sockDgram.open();
+    //m_sockDgram.set(m_addr);
+    m_sockDgram.open(m_addr);
     handle(m_sockDgram.get_handle());
-    ACE_Reactor::instance()->register_handler(this, ACE_Event_Handle::READ_MASK);
+    ACE_Reactor::instance()->register_handler(this, ACE_Event_Handler::READ_MASK);
   }
   else
   {
     /*To be added for TCP.*/
+    ;
   }
 }
 
 /*HostapdTask Class Definition...*/
-HostapdTask::HostapdTask(ReadlineIF *pReadlineIF, HostapdCtrlIF *pCtrlIF)
+HostapdTask::HostapdTask(ReadlineIF *pReadlineIF, 
+                         HostapdCtrlIF *pCtrlIF)
 {
   do 
   {
     readlineIF(pReadlineIF);
     if(!readlineIF())
     {
-      ACE_ERRORO((LM_ERROR, "Pointer to readlineIF is NULL\n"));
+      ACE_ERROR((LM_ERROR, "Pointer to readlineIF is NULL\n"));
       break;
     }
 
@@ -108,24 +113,30 @@ HostapdTask::HostapdTask(ReadlineIF *pReadlineIF, HostapdCtrlIF *pCtrlIF)
       break;
     }
     
-    readlineIF()->hostapdTask(this);
+    //readlineIF()->hostapdTask(this);
     readlineIF()->init();
-    open();
+    open(0);
 
   }while(0);
 }
 
-int HostapdTask::open(void)
+HostapdTask::~HostapdTask()
+{
+  
+}
+
+int HostapdTask::open(void *args)
 {
   /*Make this object as an Active Object.*/
-  activate(THR_NEW_LWP, 1);
+  activate(THR_NEW_LWP);
   return(0);
 }
 
 
 int HostapdTask::svc(void)
 {
-  /*readline completer is bind successfully.*/
+  char *line = NULL;
+  char *s = NULL;
 
   /* Loop reading and executing lines until the user quits. */
   for( ; !readlineIF()->continueStatus(); )
@@ -142,7 +153,8 @@ int HostapdTask::svc(void)
 
     if(*s)
     {
-      readlineIF()->add_history(s);
+      //readlineIF()->add_history(s);
+      add_history(s);
       readlineIF()->executeLine(s);
     }
 

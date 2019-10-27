@@ -9,9 +9,9 @@ SRC = $(SRC_DIR)/readlineIF.cc $(SRC_DIR)/hostapdIF.cc $(SRC_DIR)/vapsh.cc
 HDR = $(HDR_DIR)/readlineIF.h $(HDR_DIR)/hostapdIF.h $(HDR_DIR)/vapsh.h
 OBJ = $(OBJ_DIR)/readlineIF.o $(OBJ_DIR)/hostapdIF.o $(OBJ_DIR)/vapsh.o
 LIB_DIR = -L/usr/local/readline-8.0-rc1/lib -L/home/naushada/sw-packages/ACE_wrappers/lib
-LIB = -lreadline -lACE
+LIB = -lreadline -lACE -lpthread
 INC = -Iinc -I/home/naushada/sw-packages/ACE_wrappers -I/usr/local/readline-8.0-rc1/include
-BIN = $(BIN_PATH)/vapsh
+BIN = $(BIN_DIR)/vapsh
 
 all: build bin $(BIN)
 .PHONY: build bin $(BIN)
@@ -22,7 +22,7 @@ build:
 
 bin: $(OBJ)
 
-$(OBJ) : $(SRC)
+$(OBJ_DIR)/%.o: $(SRC_DIR)/%.cc
 	$(CC) $(FLAGS) -c $< -o $@ $(INC)
 
 $(BIN): $(OBJ)

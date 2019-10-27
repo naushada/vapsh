@@ -1,13 +1,17 @@
 #ifndef __READLINE_IF_CC__
 #define __READLINE_IF_CC__
 
+#include <stdio.h>
+#include <string.h>
 #include <readline/readline.h>
 #include <readline/history.h>
 
 #include "readlineIF.h"
 #include "hostapdIF.h"
+int ReadlineIF::m_offset = 0;
+int ReadlineIF::m_len = 0;
 
-ReadlineIF::m_command[256] = 
+ReadlineIF::command ReadlineIF::m_command[256] = 
 {
   { "ping",                  "pings hostapd" },
   { "mib",                   "get MIB variables (dot1x, dot11, radius)" },
@@ -46,8 +50,7 @@ ReadlineIF::m_command[256] =
   { "ess_disassoc",          "send ESS Dissassociation Imminent notification" },
   { "bss_tm_req",            "send BSS Transition Management Request" },
   { "get_config",            "show current configuration" },
-  { "help", hostapd_cli_cmd_help, hostapd_cli_complete_help,
-          "= show this usage help" },
+  { "help",                  "= show this usage help" },
   { "interface",             "[ifname] = show interfaces/select interface" },
 #ifdef CONFIG_FST
   { "fst",                   "<params...> = send FST-MANAGER control "
@@ -126,26 +129,6 @@ ReadlineIF::m_command[256] =
  * @param 
  * @return
  */
-void ReadlineIF::offset(int offset)
-{
-  m_offset = offset;
-}
-
-/*
- * @brief 
- * @param 
- * @return
- */
-int ReadlineIF::offset()
-{
-  return(m_offset);
-}
-
-/*
- * @brief 
- * @param 
- * @return
- */
 void ReadlineIF::prompt(char *prompt)
 {
   m_prompt = strdup(prompt);
@@ -161,55 +144,34 @@ char *ReadlineIF::prompt()
   return(m_prompt);
 }
 
-/*
- * @brief 
- * @param 
- * @return
- */
-void ReadlineIF::len(int len)
-{
-  m_len = len;
-}
-
-/*
- * @brief 
- * @param 
- * @return
- */
-int ReadlineIF::len()
-{
-  return(m_len);
-}
-
-
 /* Generator function for command completion.  STATE lets us know whether
  * to start from scratch; without any state (i.e. STATE == 0), then we
  * start at the top of the list. 
  */
-char *ReadlineIF::commandGenerator(char *text, int state)
+char *commandGenerator(const char *text, int state)
 {
-  char *name;
+  const char *name;
 
   /* If this is a new word to complete, initialize now.  This includes
      saving the length of TEXT for efficiency, and initializing the index
      variable to 0. */
   if (!state)
-    {
-      offset(0);
-      len(strlen(text));
-    }
+  {
+    ReadlineIF::m_offset = 0;
+    ReadlineIF::m_len = strlen(text);
+  }
 
+  int idx = ReadlineIF::m_offset;
   /* Return the next name which partially matches from the command list. */
-  while (name = ReadlineIF::command[offset()].cmd)
-    {
-      offset(offset()++);
-
-      if (strncmp (name, text, len()) == 0)
-        return (strdup(name));
-    }
+  while(NULL != (name = ReadlineIF::m_command[idx].cmd))
+  {
+    idx += 1;
+    if(strncmp (name, text, ReadlineIF::m_len) == 0)
+      return(strdup(name));
+  }
 
   /* If no names matched, then return NULL. */
-  return ((char *)NULL);
+  return((char *)NULL);
 }
 
 /* Attempt to complete on the contents of TEXT.  START and END show the
@@ -217,7 +179,7 @@ char *ReadlineIF::commandGenerator(char *text, int state)
  * entire line in case we want to do some simple parsing.  Return the
  * array of matches, or NULL if there aren't any. 
  */
-char **ReadlineIF::commandCompletion(char *text, int start, int end)
+char **commandCompletion(const char *text, int start, int end)
 {
   char **matches;
 
@@ -227,7 +189,7 @@ char **ReadlineIF::commandCompletion(char *text, int start, int end)
      to complete.  Otherwise it is the name of a file in the current
      directory. */
   if(start == 0)
-    matches = completion_matches(text, commandGenerator);
+    matches = rl_completion_matches(text, commandGenerator);
 
   return (matches);
 }
@@ -235,11 +197,11 @@ char **ReadlineIF::commandCompletion(char *text, int start, int end)
 int ReadlineIF::init(void)
 {
   /* Tell the completer that we want a crack first. */
-  rl_attempted_completion_function = (CPPFunction *)commandCompletion;
+  rl_attempted_completion_function = commandCompletion;
   return(1);
 }
 
-virtual ReadlineIF::~ReadlineIF()
+ReadlineIF::~ReadlineIF()
 {
   delete m_prompt;
 }
@@ -247,10 +209,8 @@ virtual ReadlineIF::~ReadlineIF()
 ReadlineIF::ReadlineIF()
 {
   m_prompt         = NULL;
-  m_offset         = 0;
-  m_len            = 0;
   m_continueStatus = false;
-  m_hostapdTask    = NULL;
+  //m_hostapdTask    = NULL;
 }
 
 /* Look up NAME as the name of a command, and return a pointer to that
@@ -334,9 +294,12 @@ int ReadlineIF::executeLine(char *line)
     /* Call the function. */
     return(processCommand(line, strlen(line)));
   }
+
+  return(0);
 }
 
-void ReadlineIF::hostapdTask(hostapdTask *hostapdTask)
+#if 0
+void ReadlineIF::hostapdTask(HostapdTask *hostapdTask)
 {
   m_hostapdTask = hostapdTask;
 }
@@ -345,6 +308,8 @@ HostapdTask *ReadlineIF::hostapdTask(void)
 {
   return(m_hostapdTask);
 }
+
+#endif 
 
 /* Print out help for cmd, or for all of the commands if cmd is
  * not present. 
@@ -359,8 +324,8 @@ void ReadlineIF::help(char *cmd)
     if(!*cmd || (!strcmp(cmd, ReadlineIF::m_command[i].cmd)))
     {
       printf("%s\t\t%s.\n", 
-             ReadlienIF::m_command[i].cmd, 
-             ReadlieIF::m_command[i].usage);
+             ReadlineIF::m_command[i].cmd, 
+             ReadlineIF::m_command[i].usage);
       printed++;
     }
   }
@@ -369,7 +334,7 @@ void ReadlineIF::help(char *cmd)
   {
     printf ("No commands match `%s'.  Possibilties are:\n", cmd);
 
-    for (i = 0; ReadlienIF::m_command[i].cmd; i++)
+    for (i = 0; ReadlineIF::m_command[i].cmd; i++)
     {
       /* Print in six columns. */
       if (printed == 1)
@@ -385,7 +350,7 @@ void ReadlineIF::help(char *cmd)
     if(printed)
       printf ("\n");
   }
-  return (0);
+
 }
 
 void ReadlineIF::quit(void)
