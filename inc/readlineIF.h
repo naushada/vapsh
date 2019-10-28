@@ -24,14 +24,12 @@ class ReadlineIF
     ReadlineIF();
     virtual ~ReadlineIF();
     int init(void);
+
     friend char **commandCompletion(const char *text, int start, int end);
     friend char *commandGenerator(const char *text, int state);
-    //void offset(int offset);
-    //int offset(void);
+
     void prompt(char *prompt);
     char *prompt(void);
-    //void len(int len);
-    //int len(void);
     int executeLine(char *line);
     int processCommand(char *cmd, int len);
     int processResponse(char *rsp, int len);

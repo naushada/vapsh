@@ -9,7 +9,7 @@
 #include "readlineIF.h"
 #include "hostapdIF.h"
 
-
+/*These are static data member*/
 int ReadlineIF::m_offset = 0;
 int ReadlineIF::m_len = 0;
 
@@ -154,7 +154,6 @@ char *commandGenerator(const char *text, int state)
 {
   const char *name;
 
-  ACE_DEBUG((LM_DEBUG, "text is %s state is %d\n", text, state));
 
   /* If this is a new word to complete, initialize now.  This includes
      saving the length of TEXT for efficiency, and initializing the index
@@ -165,13 +164,15 @@ char *commandGenerator(const char *text, int state)
     ReadlineIF::m_len = strlen(text);
   }
 
-  int idx = ReadlineIF::m_offset;
+  int &idx = ReadlineIF::m_offset;
   /* Return the next name which partially matches from the command list. */
   while(NULL != (name = ReadlineIF::m_command[idx].cmd))
   {
     idx += 1;
     if(strncmp (name, text, ReadlineIF::m_len) == 0)
+    {
       return(strdup(name));
+    }
   }
 
   /* If no names matched, then return NULL. */
@@ -202,7 +203,7 @@ int ReadlineIF::init(void)
 {
   /* Tell the completer that we want a crack first. */
   rl_attempted_completion_function = commandCompletion;
-  return(1);
+  return(0);
 }
 
 ReadlineIF::~ReadlineIF()
@@ -283,6 +284,7 @@ int ReadlineIF::executeLine(char *line)
   if(!isFound)
   {
     ACE_ERROR((LM_ERROR, "%s: No such command.\n", word));
+    help(word);
     return(-1);
   }
   
