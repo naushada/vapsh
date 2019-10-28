@@ -1,5 +1,6 @@
 #ifndef __HOSTAPD_IF_CC__
 #define __HOSTAPD_IF_CC__
+
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
@@ -30,15 +31,43 @@ HostapdCtrlIF::CtrlIntfType_t HostapdCtrlIF::ctrlIntfType(void)
 int HostapdCtrlIF::main(int argc, char *argv[])
 {
   ReadlineIF *readlineIF = new ReadlineIF();
-  readlineIF->prompt(argv[1]);
-  HostapdTask *instance  = new HostapdTask(readlineIF, this);
-  
+
+  if(argc <= 1)
+  {
+    readlineIF->prompt("(#): ");
+  }
+  else
+  {
+    readlineIF->prompt(argv[1]);
+  }
+
+  HostapdTask *instance  = new HostapdTask(ACE_Thread_Manager::instance(),
+                                           readlineIF, 
+                                           this);
+  /*! Time Out Value of 1sec.*/
+  ACE_Time_Value to(1,0);
   while(1)
   {  
-    ACE_Reactor::instance()->handle_events();
+    if(-1 == ACE_Reactor::instance()->handle_events(to))
+    {
+      ACE_ERROR((LM_ERROR, "handle_events failed\n"));
+      break;
+    }
   }
 
   delete readlineIF;
+  return(0);
+}
+
+int HostapdCtrlIF::handle_close(ACE_HANDLE handle, ACE_Reactor_Mask mask)
+{
+ 
+  if(HostapdCtrlIF::UNIX == ctrlIntfType()) 
+  {
+    unlink(HOSTAPD_UNIX_SOCK_PATH);
+  }
+
+  ACE_DEBUG((LM_DEBUG, "handle_close Hook Method is called\n"));
   return(0);
 }
 
@@ -74,7 +103,6 @@ int HostapdCtrlIF::handle_input(ACE_HANDLE handle)
  */
 ACE_HANDLE HostapdCtrlIF::get_handle(void) const
 {
-  ACE_DEBUG((LM_DEBUG, "get_handle is called\n"));
   return(const_cast<HostapdCtrlIF *>(this)->handle());
 }
 
@@ -91,21 +119,30 @@ void HostapdCtrlIF::handle(ACE_HANDLE handle)
 
 HostapdCtrlIF::~HostapdCtrlIF()
 {
-  ;
+  if(ctrlIntfType() == HostapdCtrlIF::UNIX)
+  {
+    ACE_Reactor::instance()->remove_handler(this, ACE_Event_Handler::READ_MASK);
+  }
+  else if(ctrlIntfType() == HostapdCtrlIF::UDP)
+  {
+    ACE_Reactor::instance()->remove_handler(this, ACE_Event_Handler::READ_MASK);
+    ACE_DEBUG((LM_DEBUG, "de-registering the handler\n"));
+  }
+  else
+  {
+    ACE_DEBUG((LM_DEBUG, "To be updated for TCP\n"));
+  }
 }
 
 HostapdCtrlIF::HostapdCtrlIF(HostapdCtrlIF::CtrlIntfType_t ctrlIFType)
 {
-
   do 
   {
     ctrlIntfType(ctrlIFType);
   
     if(HostapdCtrlIF::UNIX == ctrlIFType)
     {
-      const char *path = "/var/run/hostapd";
-      unlink(path);
-      m_unixAddr.set(path);
+      m_unixAddr.set(HOSTAPD_UNIX_SOCK_PATH);
 
       if(-1 == m_unixDgram.open(m_unixAddr))
       {
@@ -115,17 +152,17 @@ HostapdCtrlIF::HostapdCtrlIF(HostapdCtrlIF::CtrlIntfType_t ctrlIFType)
       }
 
       handle(m_unixDgram.get_handle());
+      /*Note: Right after registering handler, ACE Framework calls get_handle 
+              to retrieve the handle. The handle is nothing but a fd 
+              (File Descriptor).*/
       ACE_Reactor::instance()->register_handler(this, ACE_Event_Handler::READ_MASK);
     }
     else if(HostapdCtrlIF::UDP == ctrlIFType)
     {
-      ACE_UINT16 port = 9877;
-      const char *lo = "127.0.0.1";
-      ACE_INT32 len = strlen(lo);
-      ACE_DEBUG((LM_INFO, "HostapdCtrlIF::UDP\n"));
-      m_addr.set_port_number(port);
-      m_addr.set_address(lo,len); 
-      close(port);
+      ACE_INT32 len = strlen(HOSTAPD_LO_IP);
+      m_addr.set_port_number(HOSTAPD_UDP_PORT);
+      m_addr.set_address(HOSTAPD_LO_IP, len); 
+
       if(-1 == m_sockDgram.open(m_addr))
       {
         ACE_ERROR((LM_ERROR,
@@ -135,6 +172,9 @@ HostapdCtrlIF::HostapdCtrlIF(HostapdCtrlIF::CtrlIntfType_t ctrlIFType)
       }  
 
       handle(m_sockDgram.get_handle());
+      /*Note: Right after registering handler, ACE Framework calls get_handle 
+              to retrieve the handle. The handle is nothing but a fd 
+              (File Descriptor).*/
       ACE_Reactor::instance()->register_handler(this, ACE_Event_Handler::READ_MASK);
     }
     else
@@ -158,8 +198,16 @@ HostapdCtrlIF *HostapdTask::hostapdCtrlIF(void)
   return(m_hostapdCtrlIF);
 }
 
-HostapdTask::HostapdTask(ReadlineIF *pReadlineIF, 
-                         HostapdCtrlIF *pCtrlIF)
+HostapdTask::HostapdTask()
+{
+  m_readlineIF = NULL;
+  m_hostapdCtrlIF = NULL;
+}
+
+HostapdTask::HostapdTask(ACE_Thread_Manager *thrMgr,
+                         ReadlineIF *pReadlineIF, 
+                         HostapdCtrlIF *pCtrlIF) 
+            : ACE_Task<ACE_MT_SYNCH>(thrMgr)
 {
   do 
   {
@@ -217,7 +265,6 @@ int HostapdTask::svc(void)
 
     if(*s)
     {
-      //readlineIF()->add_history(s);
       add_history(s);
       readlineIF()->executeLine(s);
     }
@@ -225,6 +272,7 @@ int HostapdTask::svc(void)
     free (line);
   }
 
+  delete hostapdCtrlIF();
   exit(0);
 }
 

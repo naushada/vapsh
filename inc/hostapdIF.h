@@ -14,6 +14,10 @@
 
 #include "readlineIF.h"
 
+#define HOSTAPD_UNIX_SOCK_PATH "/var/run/hostapd"
+#define HOSTAPD_UDP_PORT 9877
+#define HOSTAPD_LO_IP "127.0.0.1"
+
 /*Forward Declaration...*/
 class HostapdTask;
 
@@ -21,6 +25,7 @@ class HostapdCtrlIF : public ACE_Event_Handler
 {
   public:
     virtual int handle_input(ACE_HANDLE handle = ACE_INVALID_HANDLE);
+    virtual int handle_close(ACE_HANDLE handle, ACE_Reactor_Mask mask);
     virtual ACE_HANDLE get_handle(void) const;
     HostapdCtrlIF();
     virtual ~HostapdCtrlIF();
@@ -55,7 +60,8 @@ class HostapdTask : public ACE_Task<ACE_MT_SYNCH>
     //virtual int close(u_long flags=0);
     //virtual int put(ACE_Message_Block *mb, ACE_Time_Value *to=0);
 
-    HostapdTask(ReadlineIF *pReadlineIF, 
+    HostapdTask(ACE_Thread_Manager *thrMgr,
+                ReadlineIF *pReadlineIF, 
                 HostapdCtrlIF *pCtrlIF);
 
     HostapdTask();

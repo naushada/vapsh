@@ -8,6 +8,8 @@
 
 #include "readlineIF.h"
 #include "hostapdIF.h"
+
+
 int ReadlineIF::m_offset = 0;
 int ReadlineIF::m_len = 0;
 
