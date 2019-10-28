@@ -33,13 +33,13 @@ class HostapdCtrlIF : public ACE_Event_Handler
     int main(int argc, char *argv[]);
   
   private:
-    ACE_HANDLE          m_handle;
-    ACE_UNIX_Addr       m_unixAddr;
-    ACE_INET_Addr       m_addr;
-    ACE_SOCK_Dgram      m_sockDgram;
-    ACE_LSOCK_Dgram     m_unixDgram;
-    CtrlIntfType_t      m_ctrlIntfType;
-    HostapdTask         *m_hostapdTask;
+    ACE_HANDLE       m_handle;
+    ACE_UNIX_Addr    m_unixAddr;
+    ACE_INET_Addr    m_addr;
+    ACE_SOCK_Dgram   m_sockDgram;
+    ACE_LSOCK_Dgram  m_unixDgram;
+    CtrlIntfType_t   m_ctrlIntfType;
+    HostapdTask      *m_hostapdTask;
     
 };
 

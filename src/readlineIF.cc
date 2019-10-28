@@ -152,6 +152,8 @@ char *commandGenerator(const char *text, int state)
 {
   const char *name;
 
+  ACE_DEBUG((LM_DEBUG, "text is %s state is %d\n", text, state));
+
   /* If this is a new word to complete, initialize now.  This includes
      saving the length of TEXT for efficiency, and initializing the index
      variable to 0. */

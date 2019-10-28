@@ -74,6 +74,7 @@ int HostapdCtrlIF::handle_input(ACE_HANDLE handle)
  */
 ACE_HANDLE HostapdCtrlIF::get_handle(void) const
 {
+  ACE_DEBUG((LM_DEBUG, "get_handle is called\n"));
   return(const_cast<HostapdCtrlIF *>(this)->handle());
 }
 
@@ -84,6 +85,7 @@ ACE_HANDLE HostapdCtrlIF::handle(void)
 
 void HostapdCtrlIF::handle(ACE_HANDLE handle)
 {
+  ACE_DEBUG((LM_DEBUG, "The Value of handle is %d\n", m_handle));
   m_handle = handle;  
 }
 
@@ -94,29 +96,51 @@ HostapdCtrlIF::~HostapdCtrlIF()
 
 HostapdCtrlIF::HostapdCtrlIF(HostapdCtrlIF::CtrlIntfType_t ctrlIFType)
 {
-  ctrlIntfType(ctrlIFType);
+  do 
+  {
+    ctrlIntfType(ctrlIFType);
   
-  if(HostapdCtrlIF::UNIX == ctrlIFType)
-  {
-    m_unixAddr.set("/var/run/hostapd");
-    //m_unixDgram.set(m_unixAddr);
-    m_unixDgram.open(m_unixAddr);
-    handle(m_unixDgram.get_handle());
-    ACE_Reactor::instance()->register_handler(this, ACE_Event_Handler::READ_MASK);
-  }
-  else if(HostapdCtrlIF::UDP == ctrlIFType)
-  {
-    m_addr.set(9877);
-    //m_sockDgram.set(m_addr);
-    m_sockDgram.open(m_addr);
-    handle(m_sockDgram.get_handle());
-    ACE_Reactor::instance()->register_handler(this, ACE_Event_Handler::READ_MASK);
-  }
-  else
-  {
-    /*To be added for TCP.*/
-    ;
-  }
+    if(HostapdCtrlIF::UNIX == ctrlIFType)
+    {
+      ACE_DEBUG((LM_INFO, "HostapdCtrlIF::UNIX\n"));
+
+      m_unixAddr.set("/var/run/hostapd");
+      ACE_DEBUG((LM_DEBUG, "path name is %s\n", m_unixAddr.get_path_name()));
+
+      //m_unixDgram.set(m_unixAddr);
+
+      if(-1 == m_unixDgram.open(m_unixAddr))
+      {
+        ACE_ERROR((LM_ERROR,"Unix Socket Creation Failed\n"));
+        break;
+      }
+
+      handle(m_unixDgram.get_handle());
+      ACE_Reactor::instance()->register_handler(this, ACE_Event_Handler::READ_MASK);
+    }
+    else if(HostapdCtrlIF::UDP == ctrlIFType)
+    {
+      ACE_DEBUG((LM_INFO, "HostapdCtrlIF::UDP\n"));
+      m_addr.set(9877);
+      //m_sockDgram.set(m_addr);
+      if(-1 == m_sockDgram.open(m_addr))
+      {
+        ACE_ERROR((LM_ERROR,
+                  "UDP socket creation failed\n"));
+        break;
+      }  
+
+      handle(m_sockDgram.get_handle());
+      ACE_Reactor::instance()->register_handler(this, ACE_Event_Handler::READ_MASK);
+    }
+    else
+    {
+      ACE_TRACE(("HostapdCtrlIF::TCP\n"));
+      /*To be added for TCP.*/
+      ;
+    }
+
+  }while(0);
 }
 
 /*HostapdTask Class Definition...*/
