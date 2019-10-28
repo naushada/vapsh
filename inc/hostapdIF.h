@@ -48,12 +48,12 @@ class HostapdTask : public ACE_Task<ACE_MT_SYNCH>
   public:
     virtual int open(void *args=0); 
     virtual int svc(void);
-    virtual int wait();
-    virtual int suspend(void);
-    virtual int resume(void);
-    virtual int activate(long flags);
-    virtual int close(u_long flags=0);
-    virtual int put(ACE_Message_Block *mb, ACE_Time_Value *to=0);
+    //virtual int wait();
+    //virtual int suspend(void);
+    //virtual int resume(void);
+    //virtual int activate(long flags);
+    //virtual int close(u_long flags=0);
+    //virtual int put(ACE_Message_Block *mb, ACE_Time_Value *to=0);
 
     HostapdTask(ReadlineIF *pReadlineIF, 
                 HostapdCtrlIF *pCtrlIF);

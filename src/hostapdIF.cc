@@ -7,9 +7,30 @@
 #include "readlineIF.h"
 #include "hostapdIF.h"
 
+void HostapdTask::readlineIF(ReadlineIF *readlineIF)
+{
+  m_readlineIF = readlineIF;  
+}
+
+ReadlineIF *HostapdTask::readlineIF(void)
+{
+  return(m_readlineIF);
+}
+
+void HostapdCtrlIF::ctrlIntfType(CtrlIntfType_t ctrlIFType)
+{
+  m_ctrlIntfType = ctrlIFType;
+}
+
+HostapdCtrlIF::CtrlIntfType_t HostapdCtrlIF::ctrlIntfType(void)
+{
+  return(m_ctrlIntfType);
+}
+
 int HostapdCtrlIF::main(int argc, char *argv[])
 {
   ReadlineIF *readlineIF = new ReadlineIF();
+  readlineIF->prompt(argv[1]);
   HostapdTask *instance  = new HostapdTask(readlineIF, this);
   
   while(1)
@@ -66,7 +87,12 @@ void HostapdCtrlIF::handle(ACE_HANDLE handle)
   m_handle = handle;  
 }
 
-HostapdCtrlIF::HostapdCtrlIF(CtrlIntfType_t ctrlIFType)
+HostapdCtrlIF::~HostapdCtrlIF()
+{
+  ;
+}
+
+HostapdCtrlIF::HostapdCtrlIF(HostapdCtrlIF::CtrlIntfType_t ctrlIFType)
 {
   ctrlIntfType(ctrlIFType);
   
@@ -94,6 +120,16 @@ HostapdCtrlIF::HostapdCtrlIF(CtrlIntfType_t ctrlIFType)
 }
 
 /*HostapdTask Class Definition...*/
+void HostapdTask::hostapdCtrlIF(HostapdCtrlIF *hostapdCtrlIF)
+{
+  m_hostapdCtrlIF = hostapdCtrlIF;
+}
+
+HostapdCtrlIF *HostapdTask::hostapdCtrlIF(void)
+{
+  return(m_hostapdCtrlIF);
+}
+
 HostapdTask::HostapdTask(ReadlineIF *pReadlineIF, 
                          HostapdCtrlIF *pCtrlIF)
 {

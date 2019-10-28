@@ -226,6 +226,7 @@ bool ReadlineIF::isValid(char *cmd)
     {
       if(cmd && strcmp(cmd, ReadlineIF::m_command[i].cmd) == 0)
       {
+        ACE_DEBUG((LM_DEBUG, "The Entered command is %s\n", ReadlineIF::m_command[i].cmd));
         result = true;
         break;
       }
@@ -277,7 +278,7 @@ int ReadlineIF::executeLine(char *line)
 
   if(!isFound)
   {
-    fprintf(stderr, "%s: No such command for FileMan.\n", word);
+    ACE_ERROR((LM_ERROR, "%s: No such command.\n", word));
     return(-1);
   }
   
@@ -370,7 +371,7 @@ bool ReadlineIF::continueStatus(void)
 
 int ReadlineIF::processCommand(char *cmd, int len)
 {
-  printf("The Command is %s\n", cmd);
+  ACE_DEBUG((LM_DEBUG, "The Command is %s\n", cmd));
   return(0);
 }
 
