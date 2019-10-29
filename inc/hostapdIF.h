@@ -8,14 +8,15 @@
 #include <ace/INET_Addr.h>
 #include <ace/UNIX_Addr.h>
 #include <ace/SOCK_Dgram.h>
+#include <ace/LSOCK_CODgram.h>
 #include <ace/LSOCK_Dgram.h>
 #include <ace/Task_T.h>
 #include <ace/UNIX_Addr.h>
 
 #include "readlineIF.h"
 
-#define HOSTAPD_UNIX_SOCK_PATH "/var/run/hostapd"
-//#define HOSTAPD_UNIX_SOCK_PATH "udp:9877/wlan0"
+#define HOSTAPD_UNIX_SOCK_PATH "/var/run/hostapd/wlan0"
+#define HOSTAPD_UNIX_LOCAL_SOCK_PATH "/tmp/vapsh"
 #define HOSTAPD_DEST_UDP_PORT 9877
 #define HOSTAPD_DEST_IP "10.100.16.1"
 #define HOSTAPD_LOCAL_UDP_PORT 59877
@@ -42,14 +43,16 @@ class HostapdCtrlIF : public ACE_Event_Handler
     int transmit(char *command);
   
   private:
-    ACE_HANDLE       m_handle;
-    ACE_UNIX_Addr    m_unixAddr;
+    ACE_HANDLE  m_handle;
+    ACE_UNIX_Addr  m_unixAddr;
     /*Local Address*/
-    ACE_INET_Addr    m_addr;
-    ACE_SOCK_Dgram   m_sockDgram;
+    ACE_INET_Addr  m_addr;
+    ACE_SOCK_Dgram  m_sockDgram;
     ACE_LSOCK_Dgram  m_unixDgram;
-    CtrlIntfType_t   m_ctrlIntfType;
-    HostapdTask      *m_hostapdTask;
+    /*Connection Oriented Datagram*/
+    ACE_LSOCK_CODgram  m_unixCODgram;
+    CtrlIntfType_t  m_ctrlIntfType;
+    HostapdTask  *m_hostapdTask;
     
 };
 

@@ -10,17 +10,37 @@
 
 int HostapdCtrlIF::transmit(char *command)
 {
-  if(HostapdCtrlIf::UDP == ctrlIntfType())
+  do 
   {
-    ACE_INET_Addr peer(HOSTAPD_DEST_UDP_PORT, HOSTAPD_DEST_IP);
-    size_t len = strlen(command);
+    size_t len = -1;
+    if(!command)
+    {
+      ACE_ERROR((LM_ERROR, "Command can't be transmitted because it's NULL\n"));
+      break;
+    }
 
-    ACE_DEBUG((LM_DEBUG, "The Command %s to be tranmitted\n", command));
+    len = ACE_OS::strlen(command);
 
-    return(m_sockDgram.send(command, len, peer));
-  }
+    if(HostapdCtrlIF::UDP == ctrlIntfType())
+    {
+      ACE_INET_Addr peer(HOSTAPD_DEST_UDP_PORT, HOSTAPD_DEST_IP);
+
+      ACE_DEBUG((LM_DEBUG, "The Command %s to be tranmitted\n", command));
+
+      return(m_sockDgram.send(command, len, peer));
+    }
+
+    /*For UNIX Socket...*/
+    ACE_UNIX_Addr peer(HOSTAPD_UNIX_SOCK_PATH);
+    if(m_unixDgram.send(command, len, peer, 0) < 0)
+    {
+      ACE_ERROR((LM_ERROR, "Sending of command len %d (%s) failed\n", strlen(command), command));
+      perror("Send Failed:");
+    }
+
+  }while(0);  
   
-  
+  return(0);
 }
 
 void HostapdTask::readlineIF(ReadlineIF *readlineIF)
@@ -101,7 +121,16 @@ int HostapdCtrlIF::handle_input(ACE_HANDLE handle)
 
   if(HostapdCtrlIF::UNIX == ctrlIntfType())
   {
-    /*UNIX socket for IPC.*/  
+    /*UNIX socket for IPC.*/
+    ACE_UNIX_Addr peer;
+    int recv_len = -1;
+    if((recv_len = m_unixDgram.recv(buff, len, peer)) < 0)
+    {
+      ACE_ERROR((LM_ERROR, "Receive from peer failed\n"));
+      perror("Unix Receive Failed:");
+    }
+
+    ACE_DEBUG((LM_DEBUG, "%s\n", buff));
   }
   else if(HostapdCtrlIF::UDP ==  ctrlIntfType())
   {
@@ -146,6 +175,7 @@ HostapdCtrlIF::~HostapdCtrlIF()
 {
   if(ctrlIntfType() == HostapdCtrlIF::UNIX)
   {
+    ACE_OS::unlink(m_unixAddr.get_path_name());
     ACE_Reactor::instance()->remove_handler(this, ACE_Event_Handler::READ_MASK);
   }
   else if(ctrlIntfType() == HostapdCtrlIF::UDP)
@@ -167,9 +197,22 @@ HostapdCtrlIF::HostapdCtrlIF(HostapdCtrlIF::CtrlIntfType_t ctrlIFType)
   
     if(HostapdCtrlIF::UNIX == ctrlIFType)
     {
-      m_unixAddr.set(HOSTAPD_UNIX_SOCK_PATH);
+      if(-1 == m_unixAddr.set(HOSTAPD_UNIX_LOCAL_SOCK_PATH))
+      {
+        ACE_ERROR((LM_ERROR, "Setting of Address Failed\n"));
+        perror("Setting of peer address failed: ");
+        break;
+      }
 
-      if(-1 == m_unixDgram.open(m_unixAddr))
+      #ifdef DEBUG
+      ACE_OS::unlink(m_unixAddr.get_path_name());
+      struct sockaddr_un *ss = (struct sockaddr_un *)m_unixAddr.get_addr();
+      ACE_DEBUG((LM_DEBUG, "family %d path %s\n", ss->sun_family, ss->sun_path));
+      #endif
+
+      /*CODgram is the Connection Oriented Datagram, where peer i
+        address is not specified while sending request.*/
+      if(-1 == m_unixDgram.open(m_unixAddr, PF_UNIX))
       {
         ACE_ERROR((LM_ERROR,"Unix Socket Creation Failed\n"));
         perror("Open Failed:");

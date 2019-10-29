@@ -6,7 +6,7 @@
 
 int main(int argc, char *argv[])
 {
-  HostapdCtrlIF *instance = new HostapdCtrlIF(HostapdCtrlIF::UDP);
+  HostapdCtrlIF *instance = new HostapdCtrlIF(HostapdCtrlIF::UNIX);
   instance->main(argc, argv);
 
   delete instance;
