@@ -15,8 +15,11 @@
 #include "readlineIF.h"
 
 #define HOSTAPD_UNIX_SOCK_PATH "/var/run/hostapd"
-#define HOSTAPD_UDP_PORT 9877
-#define HOSTAPD_LO_IP "127.0.0.1"
+//#define HOSTAPD_UNIX_SOCK_PATH "udp:9877/wlan0"
+#define HOSTAPD_DEST_UDP_PORT 9877
+#define HOSTAPD_DEST_IP "10.100.16.1"
+#define HOSTAPD_LOCAL_UDP_PORT 59877
+#define HOSTAPD_LOCAL_IP "127.0.0.1"
 
 /*Forward Declaration...*/
 class HostapdTask;
@@ -36,10 +39,12 @@ class HostapdCtrlIF : public ACE_Event_Handler
     void ctrlIntfType(CtrlIntfType_t ctrlIFType);
     CtrlIntfType_t ctrlIntfType(void);
     int main(int argc, char *argv[]);
+    int transmit(char *command);
   
   private:
     ACE_HANDLE       m_handle;
     ACE_UNIX_Addr    m_unixAddr;
+    /*Local Address*/
     ACE_INET_Addr    m_addr;
     ACE_SOCK_Dgram   m_sockDgram;
     ACE_LSOCK_Dgram  m_unixDgram;

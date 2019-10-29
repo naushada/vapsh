@@ -8,6 +8,21 @@
 #include "readlineIF.h"
 #include "hostapdIF.h"
 
+int HostapdCtrlIF::transmit(char *command)
+{
+  if(HostapdCtrlIf::UDP == ctrlIntfType())
+  {
+    ACE_INET_Addr peer(HOSTAPD_DEST_UDP_PORT, HOSTAPD_DEST_IP);
+    size_t len = strlen(command);
+
+    ACE_DEBUG((LM_DEBUG, "The Command %s to be tranmitted\n", command));
+
+    return(m_sockDgram.send(command, len, peer));
+  }
+  
+  
+}
+
 void HostapdTask::readlineIF(ReadlineIF *readlineIF)
 {
   m_readlineIF = readlineIF;  
@@ -79,6 +94,11 @@ int HostapdCtrlIF::handle_close(ACE_HANDLE handle, ACE_Reactor_Mask mask)
  */
 int HostapdCtrlIF::handle_input(ACE_HANDLE handle)
 {
+  char buff[1024];
+  size_t len = sizeof(buff);
+  
+  memset((void *)buff, 0, sizeof(buff));
+
   if(HostapdCtrlIF::UNIX == ctrlIntfType())
   {
     /*UNIX socket for IPC.*/  
@@ -86,6 +106,11 @@ int HostapdCtrlIF::handle_input(ACE_HANDLE handle)
   else if(HostapdCtrlIF::UDP ==  ctrlIntfType())
   {
     /*UDP socket for IPC.*/
+    ACE_INET_Addr peer;
+    if(m_sockDgram.recv(buff, len, peer) < 0)
+    {
+      ACE_ERROR((LM_ERROR, "Receive from Hostapd Failed\n"));
+    }
   }
   else
   {
@@ -159,9 +184,9 @@ HostapdCtrlIF::HostapdCtrlIF(HostapdCtrlIF::CtrlIntfType_t ctrlIFType)
     }
     else if(HostapdCtrlIF::UDP == ctrlIFType)
     {
-      ACE_INT32 len = strlen(HOSTAPD_LO_IP);
-      m_addr.set_port_number(HOSTAPD_UDP_PORT);
-      m_addr.set_address(HOSTAPD_LO_IP, len); 
+      ACE_INT32 len = strlen(HOSTAPD_LOCAL_IP);
+      m_addr.set_port_number(HOSTAPD_LOCAL_UDP_PORT);
+      m_addr.set_address(HOSTAPD_LOCAL_IP, len); 
 
       if(-1 == m_sockDgram.open(m_addr))
       {
@@ -244,7 +269,6 @@ int HostapdTask::open(void *args)
   return(0);
 }
 
-
 int HostapdTask::svc(void)
 {
   char *line = NULL;
@@ -266,7 +290,14 @@ int HostapdTask::svc(void)
     if(*s)
     {
       add_history(s);
-      readlineIF()->executeLine(s);
+      if(!(readlineIF()->executeLine(s)))
+      {
+        /*Send this command to hostapd via control interface.*/
+        if(-1 == hostapdCtrlIF()->transmit(s))
+        {
+          ACE_ERROR((LM_ERROR, "Send to Hostapd Failed\n"));
+        }
+      }
     }
 
     free (line);

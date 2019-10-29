@@ -175,6 +175,9 @@ char *commandGenerator(const char *text, int state)
     }
   }
 
+  /*Reset to default either for next command or command argument(s).*/
+  ReadlineIF::m_offset = 0;
+
   /* If no names matched, then return NULL. */
   return((char *)NULL);
 }
@@ -190,13 +193,14 @@ char **commandCompletion(const char *text, int start, int end)
 
   matches = (char **)NULL;
 
+
   /* If this word is at the start of the line, then it is a command
      to complete.  Otherwise it is the name of a file in the current
      directory. */
   if(start == 0)
     matches = rl_completion_matches(text, commandGenerator);
-
-  return (matches);
+  
+  return(matches);
 }
 
 int ReadlineIF::init(void)
@@ -231,7 +235,6 @@ bool ReadlineIF::isValid(char *cmd)
     {
       if(cmd && strcmp(cmd, ReadlineIF::m_command[i].cmd) == 0)
       {
-        ACE_DEBUG((LM_DEBUG, "The Entered command is %s\n", ReadlineIF::m_command[i].cmd));
         result = true;
         break;
       }
@@ -261,48 +264,64 @@ char *ReadlineIF::stripwhite (char *string)
   return s;
 }
 
-int ReadlineIF::executeLine(char *line)
+int ReadlineIF::executeLine(char *req)
 {
   int i;
-  char *word;
+  char *cmd = NULL;
+  char *cmdArg = NULL;
   bool isFound = false;
+  char *line = strdup(req);
+  int status = 1;
+
+  ACE_DEBUG((LM_DEBUG, "The line is %s\n", line));
 
   /* Isolate the command word. */
   i = 0;
   while(line[i] && whitespace(line[i]))
     i++;
-  word = line + i;
+  cmd = line + i;
 
   while(line[i] && !whitespace(line[i]))
     i++;
 
   if(line[i])
-    line[i++] = '\0';
+    cmd[i++] = '\0';
 
-  isFound = isValid(word);
+  cmdArg = line + i;
 
-  if(!isFound)
+  ACE_DEBUG((LM_DEBUG, "\ncmd %s argument %s\n", cmd, cmdArg));
+
+  isFound = isValid(cmd);
+
+  do 
   {
-    ACE_ERROR((LM_ERROR, "%s: No such command.\n", word));
-    help(word);
-    return(-1);
-  }
+    if(!isFound)
+    {
+      ACE_ERROR((LM_ERROR, "%s: No such command.\n", cmd));
+      help(cmd);
+      /*bypass the following statement.*/
+      break;
+    }
   
-  if(!strncmp(word, "help", 4) || (!strncmp(word, "?", 1)))
-  {
-    help(word);
-  }
-  else if(!strncmp(word, "quit", 4))
-  {
-    quit();
-  }
-  else
-  {
-    /* Call the function. */
-    return(processCommand(line, strlen(line)));
-  }
+    if(!strncmp(cmd, "help", 4) || (!strncmp(cmd, "?", 1)))
+    {
+      help(cmd);
+    }
+    else if(!strncmp(cmd, "quit", 4))
+    {
+      quit();
+    }
+    else
+    {
+      /* Call the function. */
+      //processCommand(origLine, strlen(origLine));
+      status = 0;
+    }
 
-  return(0);
+  }while(0);
+
+  free(line);
+  return(status);
 }
 
 #if 0
@@ -344,7 +363,7 @@ void ReadlineIF::help(char *cmd)
     for (i = 0; ReadlineIF::m_command[i].cmd; i++)
     {
       /* Print in six columns. */
-      if (printed == 1)
+      if (printed == 10)
       {
         printed = 0;
         printf ("\n");
