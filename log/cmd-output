@@ -1,0 +1,60 @@
+(#): ping 
+The line is ping
+
+cmd ping argument 
+The Command PING to be tranmitted
+(#): PONG
+
+
+(#): status 
+The line is status
+
+cmd status argument 
+The Command STATUS to be tranmitted
+(#): state=ENABLED
+phy=phy0
+freq=2437
+num_sta_non_erp=0
+num_sta_no_short_slot_time=0
+num_sta_no_short_preamble=0
+olbc=0
+num_sta_ht_no_gf=0
+num_sta_no_ht=0
+num_sta_ht_20_mhz=0
+num_sta_ht40_intolerant=0
+olbc_ht=1
+ht_op_mode=0x0
+cac_time_seconds=0
+cac_time_left_seconds=N/A
+channel=6
+secondary_channel=0
+ieee80211n=0
+ieee80211ac=0
+vht_oper_chwidth=0
+vht_oper_centr_freq_seg0_idx=0
+vht_oper_centr_freq_seg1_idx=0
+bss[0]=wlan0
+bssid[0]=60:67:20:40:fc:e2
+ssid[0]=DreamAvenue
+num_sta[0]=0
+
+(#): get
+get         get_config  
+(#): get_config 
+The line is get_config
+
+cmd get_config argument 
+The Command GET_CONFIG to be tranmitted
+(#): bssid=60:67:20:40:fc:e2
+ssid=DreamAvenue
+wps_state=disabled
+The Command DISABLE to be tranmitted
+(#): OK
+
+(#): enable 
+The line is enable
+
+cmd enable argument 
+The Command ENABLE to be tranmitted
+(#): OK
+
