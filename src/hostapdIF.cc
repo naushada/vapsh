@@ -25,14 +25,29 @@ int HostapdCtrlIF::transmit(char *command)
     {
       ACE_INET_Addr peer(HOSTAPD_DEST_UDP_PORT, HOSTAPD_DEST_IP);
 
-      ACE_DEBUG((LM_DEBUG, "The Command %s to be tranmitted\n", command));
 
+      ACE_INT32 idx = 0;
+      while(' ' != command[idx])
+      {
+        command[idx] = toupper(command[idx]);
+        idx++;
+      }
+
+      ACE_DEBUG((LM_DEBUG, "The Command %s to be tranmitted\n", command));
       return(m_sockDgram.send(command, len, peer));
     }
 
+    ACE_INT32 idx = 0;
+    while(' ' != command[idx])
+    {
+      command[idx] = toupper(command[idx]);
+      idx++;
+    }
+
+    ACE_DEBUG((LM_DEBUG, "The Command %s to be tranmitted\n", command));
     /*For UNIX Socket...*/
     ACE_UNIX_Addr peer(HOSTAPD_UNIX_SOCK_PATH);
-    if(m_unixDgram.send(command, len, peer, 0) < 0)
+    if(m_unixDgram.send(command, len, peer) < 0)
     {
       ACE_ERROR((LM_ERROR, "Sending of command len %d (%s) failed\n", strlen(command), command));
       perror("Send Failed:");
@@ -99,7 +114,7 @@ int HostapdCtrlIF::handle_close(ACE_HANDLE handle, ACE_Reactor_Mask mask)
  
   if(HostapdCtrlIF::UNIX == ctrlIntfType()) 
   {
-    unlink(HOSTAPD_UNIX_SOCK_PATH);
+    //unlink(HOSTAPD_UNIX_LOCAL_SOCK_PATH);
   }
 
   ACE_DEBUG((LM_DEBUG, "handle_close Hook Method is called\n"));
@@ -130,7 +145,7 @@ int HostapdCtrlIF::handle_input(ACE_HANDLE handle)
       perror("Unix Receive Failed:");
     }
 
-    ACE_DEBUG((LM_DEBUG, "%s\n", buff));
+    ACE_DEBUG((LM_DEBUG, "%s", buff));
   }
   else if(HostapdCtrlIF::UDP ==  ctrlIntfType())
   {
