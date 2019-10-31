@@ -196,7 +196,6 @@ ACE_HANDLE HostapdCtrlIF::handle(void)
 void HostapdCtrlIF::handle(ACE_HANDLE handle)
 {
   m_handle = handle;  
-  ACE_DEBUG((LM_DEBUG, "The Value of handle is %d\n", m_handle));
 }
 
 HostapdCtrlIF::~HostapdCtrlIF()
