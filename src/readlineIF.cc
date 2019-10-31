@@ -25,39 +25,29 @@ ReadlineIF::command ReadlineIF::m_command[256] =
   { "new_sta",               "<addr> = add a new station" },
   { "deauthenticate",        "<addr> = deauthenticate a station" },
   { "disassociate",          "<addr> = disassociate a station" },
-#ifdef CONFIG_TAXONOMY
   { "signature",             "<addr> = get taxonomy signature for a station" },
-#endif /* CONFIG_TAXONOMY */
-#ifdef CONFIG_IEEE80211W
   { "sa_query",              "<addr> = send SA Query to a station" },
-#endif /* CONFIG_IEEE80211W */
-#ifdef CONFIG_WPS
   { "wps_pin",               "<uuid> <pin> [timeout] [addr] = add WPS "
                              "Enrollee PIN" },
   { "wps_check_pin",         "<PIN> = verify PIN checksum" },
   { "wps_pbc",               "indicate button pushed to initiate PBC" },
   { "wps_cancel",            " cancel the pending WPS operation" },
-#ifdef CONFIG_WPS_NFC
   { "wps_nfc_tag_read",      "<hexdump> = report read NFC tag with WPS data" },
   { "wps_nfc_config_token",  "<WPS/NDEF> = build NFC configuration token" },
   { "wps_nfc_token",         "<WPS/NDEF/enable/disable> = manager "
                              "NFC password token" },
   { "nfc_get_handover_sel",  NULL },
-#endif /* CONFIG_WPS_NFC */
   { "wps_ap_pin",            "<cmd> [params..] = enable/disable AP PIN" },
   { "wps_config",            "<SSID> <auth> <encr> <key> = configure AP" },
   { "wps_get_status",        "show current WPS status" },
-#endif /* CONFIG_WPS */
   { "disassoc_imminent",     "send Disassociation Imminent notification" },
   { "ess_disassoc",          "send ESS Dissassociation Imminent notification" },
   { "bss_tm_req",            "send BSS Transition Management Request" },
   { "get_config",            "show current configuration" },
   { "help",                  "= show this usage help" },
   { "interface",             "[ifname] = show interfaces/select interface" },
-#ifdef CONFIG_FST
   { "fst",                   "<params...> = send FST-MANAGER control "
                              "interface command" },
-#endif /* CONFIG_FST */
   { "raw",                   "<params..> = send unprocessed command" },
   { "level",                 "<debug level> = change debug level" },
   { "license",               "show full hostapd_cli license" },
@@ -95,7 +85,6 @@ ReadlineIF::command ReadlineIF::m_command[256] =
   { "req_lci",               "<addr> = send LCI request to a station"},
   { "req_range",             "send FTM range request"},
   { "driver_flags",          " = show supported driver flags"},
-#ifdef CONFIG_DPP
   { "dpp_qr_code",           "report a scanned DPP URI from a QR Code" },
   { "dpp_bootstrap_gen",     "type=<qrcode> [chan=..] [mac=..] [info=..] "
                              "[curve=..] [key=..] = generate DPP bootstrap "
@@ -114,7 +103,6 @@ ReadlineIF::command ReadlineIF::m_command[256] =
                                "self DPP configuration" },
   { "dpp_pkex_add",            "add PKEX code" },
   { "dpp_pkex_remove",         "*|<id> = remove DPP pkex information" },
-#endif /* CONFIG_DPP */
   { "accept_acl",              "Add/Delete/Show/Clear accept MAC ACL" },
   { "deny_acl",                "Add/Delete/Show/Clear deny MAC ACL" },
   { "poll_sta",                "<addr> = poll a STA to check connectivity "
