@@ -8,6 +8,14 @@
 #include "readlineIF.h"
 #include "hostapdIF.h"
 
+HostapdTask::~HostapdTask()
+{
+  m_readlineIF = NULL;
+
+  /*this was holding the this pointer, do not free this pointer*/
+  m_hostapdCtrlIF = NULL; 
+}
+
 int HostapdCtrlIF::transmit(char *command)
 {
   do 
@@ -84,10 +92,12 @@ int HostapdCtrlIF::main(int argc, char *argv[])
 
   if(argc <= 1)
   {
-    readlineIF->prompt("(#): ");
+    /*vapsh is executed without command line argument.*/
+    readlineIF->prompt("(Peace): ");
   }
   else
   {
+    /*vapsh is executed with command line argument*/
     readlineIF->prompt(argv[1]);
   }
 
@@ -105,7 +115,12 @@ int HostapdCtrlIF::main(int argc, char *argv[])
     }
   }
 
+  /*reclaim the heap memory.*/
   delete readlineIF;
+  readlineIF = NULL;
+  delete instance;
+  instance = NULL;
+
   return(0);
 }
 
@@ -315,10 +330,6 @@ HostapdTask::HostapdTask(ACE_Thread_Manager *thrMgr,
   }while(0);
 }
 
-HostapdTask::~HostapdTask()
-{
-  
-}
 
 int HostapdTask::open(void *args)
 {

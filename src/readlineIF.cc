@@ -213,6 +213,8 @@ int ReadlineIF::init(void)
 ReadlineIF::~ReadlineIF()
 {
   delete m_prompt;
+  /*set to default - NULL*/
+  m_prompt = NULL;
 }
 
 ReadlineIF::ReadlineIF()

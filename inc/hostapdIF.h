@@ -31,9 +31,13 @@ class HostapdCtrlIF : public ACE_Event_Handler
     virtual int handle_input(ACE_HANDLE handle = ACE_INVALID_HANDLE);
     virtual int handle_close(ACE_HANDLE handle, ACE_Reactor_Mask mask);
     virtual ACE_HANDLE get_handle(void) const;
+
+    /*Default constructor.*/
     HostapdCtrlIF();
     virtual ~HostapdCtrlIF();
     enum CtrlIntfType_t {UNIX, UDP, TCP};
+
+    /*Parametrize constructor*/
     HostapdCtrlIF(CtrlIntfType_t ctrlIFType);
     void handle(ACE_HANDLE handle);
     ACE_HANDLE handle(void);
