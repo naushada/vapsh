@@ -35,7 +35,7 @@ int HostapdCtrlIF::transmit(char *command)
 
 
       ACE_INT32 idx = 0;
-      while(' ' != command[idx])
+      while(command[idx] && (' ' != command[idx]))
       {
         command[idx] = toupper(command[idx]);
         idx++;
@@ -46,7 +46,7 @@ int HostapdCtrlIF::transmit(char *command)
     }
 
     ACE_INT32 idx = 0;
-    while(' ' != command[idx])
+    while(command[idx] && (' ' != command[idx]))
     {
       command[idx] = toupper(command[idx]);
       idx++;
