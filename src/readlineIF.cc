@@ -275,8 +275,6 @@ int ReadlineIF::executeLine(char *req)
   char *line = strdup(req);
   int status = 1;
 
-  ACE_DEBUG((LM_DEBUG, "The line is %s\n", line));
-
   /* Isolate the command word. */
   i = 0;
   while(line[i] && whitespace(line[i]))
@@ -290,8 +288,7 @@ int ReadlineIF::executeLine(char *req)
     cmd[i++] = '\0';
 
   cmdArg = line + i;
-
-  ACE_DEBUG((LM_DEBUG, "\ncmd %s argument %s\n", cmd, cmdArg));
+  (void)cmdArg;
 
   isFound = isValid(cmd);
 

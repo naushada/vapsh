@@ -52,7 +52,6 @@ int HostapdCtrlIF::transmit(char *command)
       idx++;
     }
 
-    ACE_DEBUG((LM_DEBUG, "The Command %s to be tranmitted\n", command));
     /*For UNIX Socket...*/
     ACE_UNIX_Addr peer(HOSTAPD_UNIX_SOCK_PATH);
     if(m_unixDgram.send(command, len, peer) < 0)
@@ -132,7 +131,6 @@ int HostapdCtrlIF::handle_close(ACE_HANDLE handle, ACE_Reactor_Mask mask)
     //unlink(HOSTAPD_UNIX_LOCAL_SOCK_PATH);
   }
 
-  ACE_DEBUG((LM_DEBUG, "handle_close Hook Method is called\n"));
   return(0);
 }
 
@@ -240,8 +238,7 @@ HostapdCtrlIF::HostapdCtrlIF(HostapdCtrlIF::CtrlIntfType_t ctrlIFType)
       ACE_DEBUG((LM_DEBUG, "family %d path %s\n", ss->sun_family, ss->sun_path));
       #endif
 
-      /*CODgram is the Connection Oriented Datagram, where peer i
-        address is not specified while sending request.*/
+      ACE_OS::unlink(m_unixAddr.get_path_name());
       if(-1 == m_unixDgram.open(m_unixAddr, PF_UNIX))
       {
         ACE_ERROR((LM_ERROR,"Unix Socket Creation Failed\n"));
