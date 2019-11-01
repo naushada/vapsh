@@ -19,103 +19,109 @@ char *ReadlineIF::m_cmdName = NULL;
 
 ReadlineIF::command ReadlineIF::m_command[256] = 
 {
-  { "ping",                  "pings hostapd" },
-  { "mib",                   "get MIB variables (dot1x, dot11, radius)" },
-  { "relog",                 "reload/truncate debug log output file" },
-  { "status",                "show interface status info" },
-  { "sta",                   "<addr> = get MIB variables for one station" },
-  { "all_sta",               "get MIB variables for all stations" },
-  { "list_sta",              "list all stations" },
-  { "new_sta",               "<addr> = add a new station" },
-  { "deauthenticate",        "<addr> = deauthenticate a station" },
-  { "disassociate",          "<addr> = disassociate a station" },
-  { "signature",             "<addr> = get taxonomy signature for a station" },
-  { "sa_query",              "<addr> = send SA Query to a station" },
-  { "wps_pin",               "<uuid> <pin> [timeout] [addr] = add WPS "
-                             "Enrollee PIN" },
-  { "wps_check_pin",         "<PIN> = verify PIN checksum" },
-  { "wps_pbc",               "indicate button pushed to initiate PBC" },
-  { "wps_cancel",            " cancel the pending WPS operation" },
-  { "wps_nfc_tag_read",      "<hexdump> = report read NFC tag with WPS data" },
-  { "wps_nfc_config_token",  "<WPS/NDEF> = build NFC configuration token" },
-  { "wps_nfc_token",         "<WPS/NDEF/enable/disable> = manager "
-                             "NFC password token" },
-  { "nfc_get_handover_sel",  NULL },
-  { "wps_ap_pin",            "<cmd> [params..] = enable/disable AP PIN" },
-  { "wps_config",            "<SSID> <auth> <encr> <key> = configure AP" },
-  { "wps_get_status",        "show current WPS status" },
-  { "disassoc_imminent",     "send Disassociation Imminent notification" },
-  { "ess_disassoc",          "send ESS Dissassociation Imminent notification" },
-  { "bss_tm_req",            "send BSS Transition Management Request" },
-  { "get_config",            "show current configuration" },
-  { "help",                  "= show this usage help" },
-  { "interface",             "[ifname] = show interfaces/select interface" },
-  { "fst",                   "<params...> = send FST-MANAGER control "
-                             "interface command" },
-  { "raw",                   "<params..> = send unprocessed command" },
-  { "level",                 "<debug level> = change debug level" },
-  { "license",               "show full hostapd_cli license" },
-  { "quit",                  "exit hostapd_cli" },
-  { "set",                   "<name> <value> = set runtime variables" },
-  { "get", {"version", "tls_library", NULL}, "<name> = get runtime info" },
-  { "set_qos_map_set",       "<arg,arg,...> = set QoS Map set element" },
-  { "send_qos_map_conf",     "<addr> = send QoS Map Configure frame" },
-  { "chan_switch",           "<cs_count> <freq> [sec_channel_offset=] "
-                             "[center_freq1=]\n"
-                             "[center_freq2=] [bandwidth=] [blocktx] "
-                             "[ht|vht]\n"
-                             "initiate channel switch announcement" },
-  { "hs20_wnm_notif",        "<addr> <url>\n"
-                             "send WNM-Notification Subscription "
-                             "Remediation Request" },
-  { "hs20_deauth_req",       "<addr> <code (0/1)> <Re-auth-Delay(sec)> [url]\n"
-                             "send WNM-Notification imminent deauthentication "
-                             "indication" },
-  { "vendor",                "<vendor id> <sub command id> "
-                             "[<hex formatted data>]\n"
-                             "send vendor driver command" },
-  { "enable",                "enable hostapd on current interface" },
-  { "reload",                "reload configuration for current interface" },
-  { "disable",               "disable hostapd on current interface" },
-  { "update_beacon",         "update Beacon frame contents\n"},
-  { "erp_flush",             "drop all ERP keys"},
-  { "log_level",             "[level] = show/change log verbosity level" },
-  { "pmksa",                 "show PMKSA cache entries" },
-  { "pmksa_flush",           "flush PMKSA cache" },
-  { "set_neighbor",          "<addr> <ssid=> <nr=> [lci=] [civic=] [stat]\n"
-                             "  = add AP to neighbor database" },
-  { "remove_neighbor",       "<addr> <ssid=> = remove AP from neighbor "
-                             "database" },
-  { "req_lci",               "<addr> = send LCI request to a station"},
-  { "req_range",             "send FTM range request"},
-  { "driver_flags",          " = show supported driver flags"},
-  { "dpp_qr_code",           "report a scanned DPP URI from a QR Code" },
-  { "dpp_bootstrap_gen",     "type=<qrcode> [chan=..] [mac=..] [info=..] "
-                             "[curve=..] [key=..] = generate DPP bootstrap "
-                             "information" },
-  { "dpp_bootstrap_remove",  "*|<id> = remove DPP bootstrap information" },
-  { "dpp_bootstrap_get_uri", "<id> = get DPP bootstrap URI" },
-  { "dpp_bootstrap_info",    "<id> = show DPP bootstrap information" },
-  { "dpp_auth_init",         "peer=<id> [own=<id>] = initiate DPP "
-                             "bootstrapping" },
-  { "dpp_listen",            "<freq in MHz> = start DPP listen" },
-  { "dpp_stop_listen",       "= stop DPP listen" },
-  { "dpp_configurator_add",    "[curve=..] [key=..] = add DPP configurator" },
-  { "dpp_configurator_remove", "*|<id> = remove DPP configurator" },
-  { "dpp_configurator_get_key","<id> = Get DPP configurator's private key" },
-  { "dpp_configurator_sign",   "conf=<role> configurator=<id> = generate "
-                               "self DPP configuration" },
-  { "dpp_pkex_add",            "add PKEX code" },
-  { "dpp_pkex_remove",         "*|<id> = remove DPP pkex information" },
-  { "accept_acl",              "Add/Delete/Show/Clear accept MAC ACL" },
-  { "deny_acl",                "Add/Delete/Show/Clear deny MAC ACL" },
-  { "poll_sta",                "<addr> = poll a STA to check connectivity "
-                               "with a QoS null frame" },
-  { "req_beacon",              "<addr> [req_mode=] <measurement request "
-                               "hexdump>  = "
-                               "send a Beacon report request to a station" },
-  { "reload_wpa_psk",          "reload wpa_psk_file only" },
-  { NULL, NULL }
+  /* command name */           /* command argument(s) */                 /* command description */ 
+  { "ping",                    {/*argument list*/ NULL},                 "pings hostapd" },
+  { "mib",                     {NULL},                 "get MIB variables (dot1x, dot11, radius)" },
+  { "relog",                   {NULL},                 "reload/truncate debug log output file" },
+  { "status",                  {NULL},                 "show interface status info" },
+  { "sta",                     {NULL},                 "<addr> = get MIB variables for one station" },
+  { "all_sta",                 {NULL},                 "get MIB variables for all stations" },
+  { "list_sta",                {NULL},                 "list all stations" },
+  { "new_sta",                 {NULL},                 "<addr> = add a new station" },
+  { "deauthenticate",          {NULL},                 "<addr> = deauthenticate a station" },
+  { "disassociate",            {NULL},                 "<addr> = disassociate a station" },
+  { "signature",               {NULL},                 "<addr> = get taxonomy signature for a station" },
+  { "sa_query",                {NULL},                 "<addr> = send SA Query to a station" },
+  { "wps_pin",                 {NULL},                 "<uuid> <pin> [timeout] [addr] = add WPS "
+                                                       "Enrollee PIN" },
+  { "wps_check_pin",           {NULL},                 "<PIN> = verify PIN checksum" },
+  { "wps_pbc",                 {NULL},                 "indicate button pushed to initiate PBC" },
+  { "wps_cancel",              {NULL},                 " cancel the pending WPS operation" },
+  { "wps_nfc_tag_read",        {NULL},                 "<hexdump> = report read NFC tag with WPS data" },
+  { "wps_nfc_config_token",    {NULL},                 "<WPS/NDEF> = build NFC configuration token" },
+  { "wps_nfc_token",           {NULL},                 "<WPS/NDEF/enable/disable> = manager "
+                                                       "NFC password token" },
+  { "nfc_get_handover_sel",    {NULL},                 NULL },
+  /* command name */           /* command argument(s) */                 /* command description */ 
+  { "wps_ap_pin",              {NULL},                 "<cmd> [params..] = enable/disable AP PIN" },
+  { "wps_config",              {NULL},                 "<SSID> <auth> <encr> <key> = configure AP" },
+  { "wps_get_status",          {NULL},                 "show current WPS status" },
+  { "disassoc_imminent",       {NULL},                 "send Disassociation Imminent notification" },
+  { "ess_disassoc",            {NULL},                 "send ESS Dissassociation Imminent notification" },
+  { "bss_tm_req",              {NULL},                 "send BSS Transition Management Request" },
+  { "get_config",              {NULL},                 "show current configuration" },
+  { "help",                    {NULL},                 "= show this usage help" },
+  { "interface",               {NULL},                 "[ifname] = show interfaces/select interface" },
+  { "fst",                     {NULL},                 "<params...> = send FST-MANAGER control "
+                                                       "interface command" },
+  { "raw",                     {NULL},                 "<params..> = send unprocessed command" },
+  { "level",                   {NULL},                 "<debug level> = change debug level" },
+  { "license",                 {NULL},                 "show full hostapd_cli license" },
+  { "quit",                    {NULL},                 "exit hostapd_cli" },
+  { "set",                     {NULL},                 "<name> <value> = set runtime variables" },
+  /*get with arguments*/
+  { "get",                     {"version", "tls_library", NULL}, "<name> = get runtime info" },
+  { "set_qos_map_set",         {NULL},                 "<arg,arg,...> = set QoS Map set element" },
+  { "send_qos_map_conf",       {NULL},                 "<addr> = send QoS Map Configure frame" },
+  { "chan_switch",             {NULL},                 "<cs_count> <freq> [sec_channel_offset=] "
+  /* command name */           /* command argument(s) */                 /* command description */ 
+                                                       "[center_freq1=]\n"
+                                                       "[center_freq2=] [bandwidth=] [blocktx] "
+                                                       "[ht|vht]\n"
+                                                       "initiate channel switch announcement" },
+  { "hs20_wnm_notif",          {NULL},                 "<addr> <url>\n"
+                                                       "send WNM-Notification Subscription "
+                                                       "Remediation Request" },
+  { "hs20_deauth_req",         {NULL},                 "<addr> <code (0/1)> <Re-auth-Delay(sec)> [url]\n"
+                                                       "send WNM-Notification imminent deauthentication "
+                                                       "indication" },
+  { "vendor",                  {NULL},                 "<vendor id> <sub command id> "
+                                                       "[<hex formatted data>]\n"
+                                                       "send vendor driver command" },
+  { "enable",                  {NULL},                 "enable hostapd on current interface" },
+  { "reload",                  {NULL},                 "reload configuration for current interface" },
+  { "disable",                 {NULL},                 "disable hostapd on current interface" },
+  { "update_beacon",           {NULL},                 "update Beacon frame contents\n"},
+  { "erp_flush",               {NULL},                 "drop all ERP keys"},
+  { "log_level",               {NULL},                 "[level] = show/change log verbosity level" },
+  { "pmksa",                   {NULL},                 "show PMKSA cache entries" },
+  { "pmksa_flush",             {NULL},                 "flush PMKSA cache" },
+  { "set_neighbor",            {NULL},                 "<addr> <ssid=> <nr=> [lci=] [civic=] [stat]\n"
+                                                       "  = add AP to neighbor database" },
+  { "remove_neighbor",         {NULL},                 "<addr> <ssid=> = remove AP from neighbor "
+                                                       "database" },
+  { "req_lci",                 {NULL},                 "<addr> = send LCI request to a station"},
+  /* command name */           /* command argument(s) */                 /* command description */ 
+  { "req_range",               {NULL},                 "send FTM range request"},
+  { "driver_flags",            {NULL},                 " = show supported driver flags"},
+  { "dpp_qr_code",             {NULL},                 "report a scanned DPP URI from a QR Code" },
+  { "dpp_bootstrap_gen",       {NULL},                 "type=<qrcode> [chan=..] [mac=..] [info=..] "
+                                                       "[curve=..] [key=..] = generate DPP bootstrap "
+                                                       "information" },
+  { "dpp_bootstrap_remove",    {NULL},                 "*|<id> = remove DPP bootstrap information" },
+  { "dpp_bootstrap_get_uri",   {NULL},                 "<id> = get DPP bootstrap URI" },
+  { "dpp_bootstrap_info",      {NULL},                 "<id> = show DPP bootstrap information" },
+  { "dpp_auth_init",           {NULL},                 "peer=<id> [own=<id>] = initiate DPP "
+                                                       "bootstrapping" },
+  { "dpp_listen",              {NULL},                 "<freq in MHz> = start DPP listen" },
+  { "dpp_stop_listen",         {NULL},                 "= stop DPP listen" },
+  { "dpp_configurator_add",    {NULL},                 "[curve=..] [key=..] = add DPP configurator" },
+  { "dpp_configurator_remove", {NULL},                 "*|<id> = remove DPP configurator" },
+  { "dpp_configurator_get_key",{NULL},                 "<id> = Get DPP configurator's private key" },
+  { "dpp_configurator_sign",   {NULL},                 "conf=<role> configurator=<id> = generate "
+                                                       "self DPP configuration" },
+  { "dpp_pkex_add",            {NULL},                 "add PKEX code" },
+  { "dpp_pkex_remove",         {NULL},                 "*|<id> = remove DPP pkex information" },
+  { "accept_acl",              {NULL},                 "Add/Delete/Show/Clear accept MAC ACL" },
+  /* command name */           /* command argument(s) */                 /* command description */ 
+  { "deny_acl",                {NULL},                 "Add/Delete/Show/Clear deny MAC ACL" },
+  { "poll_sta",                {NULL},                 "<addr> = poll a STA to check connectivity "
+                                                       "with a QoS null frame" },
+  { "req_beacon",              {NULL},                 "<addr> [req_mode=] <measurement request "
+                                                       "hexdump>  = "
+                                                       "send a Beacon report request to a station" },
+  { "reload_wpa_psk",          {NULL},                 "reload wpa_psk_file only" },
+  { NULL,                      {NULL},                  NULL }
 };
 
 char *ReadlineIF::cmdName(void)
