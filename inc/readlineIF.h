@@ -12,6 +12,7 @@ class ReadlineIF
     struct command
     {
       const char *cmd;
+      const char *argv[16];
       const char *usage;  
     };
 
@@ -19,6 +20,8 @@ class ReadlineIF
 
     static int m_offset;
     static int m_len;
+    static char *m_cmdName;
+    static int m_argOffset;
 
   public:
     ReadlineIF();
@@ -27,6 +30,8 @@ class ReadlineIF
 
     friend char **commandCompletion(const char *text, int start, int end);
     friend char *commandGenerator(const char *text, int state);
+    friend char *commandArgGenerator(const char *text, int state);
+    friend char *commandArgListGenerator(const char *text, int state);
 
     void prompt(char *prompt);
     char *prompt(void);
@@ -41,6 +46,8 @@ class ReadlineIF
     void quit(void);
     bool continueStatus(void);
     void continueStatus(bool status);
+    static void cmdName(char *cmdName);
+    static char *cmdName(void);
  
   private:
     char        *m_prompt;

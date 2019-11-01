@@ -12,6 +12,10 @@
 /*These are static data member*/
 int ReadlineIF::m_offset = 0;
 int ReadlineIF::m_len = 0;
+int ReadlineIF::m_argOffset = 0;
+
+/*This static data member stores the selected command*/
+char *ReadlineIF::m_cmdName = NULL;
 
 ReadlineIF::command ReadlineIF::m_command[256] = 
 {
@@ -53,7 +57,7 @@ ReadlineIF::command ReadlineIF::m_command[256] =
   { "license",               "show full hostapd_cli license" },
   { "quit",                  "exit hostapd_cli" },
   { "set",                   "<name> <value> = set runtime variables" },
-  { "get",                   "<name> = get runtime info" },
+  { "get", {"version", "tls_library", NULL}, "<name> = get runtime info" },
   { "set_qos_map_set",       "<arg,arg,...> = set QoS Map set element" },
   { "send_qos_map_conf",     "<addr> = send QoS Map Configure frame" },
   { "chan_switch",           "<cs_count> <freq> [sec_channel_offset=] "
@@ -114,6 +118,19 @@ ReadlineIF::command ReadlineIF::m_command[256] =
   { NULL, NULL }
 };
 
+char *ReadlineIF::cmdName(void)
+{
+  return(m_cmdName);
+}
+
+void ReadlineIF::cmdName(char *cmdName)
+{
+  if(cmdName)
+  {
+    m_cmdName = strdup(cmdName);
+  }
+}
+
 /*
  * @brief 
  * @param 
@@ -134,6 +151,56 @@ char *ReadlineIF::prompt()
   return(m_prompt);
 }
 
+char *commandArgListGenerator(const char *text, int state)
+{
+  /* If this is a new word to complete, initialize now.  This includes
+     saving the length of TEXT for efficiency, and initializing the index
+     variable to 0. */
+  if (!state)
+  {
+    ReadlineIF::m_argOffset = 0;
+  }
+
+  int &idx = ReadlineIF::m_offset;
+  int &inner = ReadlineIF::m_argOffset;
+
+  if(NULL == ReadlineIF::m_command[idx].argv[inner])
+    return (char *)NULL;
+
+  return(strdup(ReadlineIF::m_command[idx].argv[inner++]));
+}
+
+
+char *commandArgGenerator(const char *text, int state)
+{
+  const char *name;
+  /* If this is a new word to complete, initialize now.  This includes
+     saving the length of TEXT for efficiency, and initializing the index
+     variable to 0. */
+  if (!state)
+  {
+    ReadlineIF::m_argOffset = 0;
+  }
+
+  int &idx = ReadlineIF::m_offset;
+  int &inner = ReadlineIF::m_argOffset;
+  /* Return the next name which partially matches from the command list. */
+  while(NULL != (name = ReadlineIF::m_command[idx].argv[inner]))
+  {
+    inner += 1;
+    if(strncmp (name, text, ACE_OS::strlen(text)) == 0)
+    {
+      return(strdup(name));
+    }
+  }
+
+  /*Reset to default either for next command or command argument(s).*/
+  ReadlineIF::m_argOffset = 0;
+
+  /* If no names matched, then return NULL. */
+  return((char *)NULL);
+}
+
 /* Generator function for command completion.  STATE lets us know whether
  * to start from scratch; without any state (i.e. STATE == 0), then we
  * start at the top of the list. 
@@ -141,8 +208,6 @@ char *ReadlineIF::prompt()
 char *commandGenerator(const char *text, int state)
 {
   const char *name;
-
-
   /* If this is a new word to complete, initialize now.  This includes
      saving the length of TEXT for efficiency, and initializing the index
      variable to 0. */
@@ -178,21 +243,53 @@ char *commandGenerator(const char *text, int state)
 char **commandCompletion(const char *text, int start, int end)
 {
   char **matches;
-
   matches = (char **)NULL;
-
 
   /* If this word is at the start of the line, then it is a command
      to complete.  Otherwise it is the name of a file in the current
      directory. */
   if(start == 0)
+  {
     matches = rl_completion_matches(text, commandGenerator);
-  
+  }
+  else
+  {
+    /*user has hit the space bar*/
+    if(start == end)
+    {
+      int idx = 0;
+      /*remember it into its context - this is the command whose argument(s) to be listed.*/
+      ReadlineIF::cmdName(rl_line_buffer);
+
+      /*Return the entire arguments - list must have last element as NULL.*/
+      for(idx = 0; ReadlineIF::m_command[idx].cmd; idx++)
+      {
+        if(!strncmp(rl_line_buffer, 
+                    ReadlineIF::m_command[idx].cmd, 
+                    ACE_OS::strlen(ReadlineIF::m_command[idx].cmd)))
+        {
+          /*remember this offset and will be used while looping through command arguments.*/
+          ReadlineIF::m_offset = idx;
+          matches = rl_completion_matches(text, commandArgListGenerator);
+          /*break the while loop.*/
+          break; 
+        } 
+      }
+    }
+    else
+    {
+      /*user has entered the initials of argument*/
+      matches = rl_completion_matches(text, commandArgGenerator);
+    }  
+  }
+
   return(matches);
 }
 
 int ReadlineIF::init(void)
 {
+
+  rl_attempted_completion_over = 1; 
   /* Tell the completer that we want a crack first. */
   rl_attempted_completion_function = commandCompletion;
   return(0);

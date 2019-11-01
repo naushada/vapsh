@@ -369,7 +369,7 @@ int HostapdTask::svc(void)
   }
 
   delete hostapdCtrlIF();
-  exit(0);
+  exit(0); 
 }
 
 
