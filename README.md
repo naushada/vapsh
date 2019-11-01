@@ -14,3 +14,6 @@ ___
  - By default vapsh prompt is (Peace)# 
  - vapsh supports the command name completion by pressing tha **tab** button
  - vapsh supports the command argument list commpletion by pressing **tab** button
+## Example
+ - (Peace)# ping - Press enter
+ - The Output will be PONG from Hostapd
