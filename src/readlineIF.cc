@@ -256,6 +256,7 @@ char **commandCompletion(const char *text, int start, int end)
      directory. */
   if(start == 0)
   {
+    rl_attempted_completion_over = 1; 
     matches = rl_completion_matches(text, commandGenerator);
   }
   else
@@ -276,6 +277,7 @@ char **commandCompletion(const char *text, int start, int end)
         {
           /*remember this offset and will be used while looping through command arguments.*/
           ReadlineIF::m_offset = idx;
+          rl_attempted_completion_over = 1; 
           matches = rl_completion_matches(text, commandArgListGenerator);
           /*break the while loop.*/
           break; 
@@ -285,6 +287,7 @@ char **commandCompletion(const char *text, int start, int end)
     else
     {
       /*user has entered the initials of argument*/
+      rl_attempted_completion_over = 1; 
       matches = rl_completion_matches(text, commandArgGenerator);
     }  
   }
