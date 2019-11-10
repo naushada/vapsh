@@ -15,7 +15,7 @@ vapsh_CPPFLAGS=-Iinc \
 
 vapsh_CFLAGS=-g -Wall
 
-vapsh_LDFLAGS=-L/usr/localACE-6.5.0/lib
+vapsh_LDFLAGS=-L/usr/local/ACE-6.5.0/lib
 
 vapsh_LDADD=-lACE -lreadline -lpthread -ltinfo
 

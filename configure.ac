@@ -12,13 +12,13 @@ AC_CHECK_HEADERS([readline/readline.h], [],
 AC_CHECK_HEADERS([readline/history.h], [],
                  [AC_MSG_ERROR([Unable to find the header file history.h])])
 
-AC_CHECK_HEADERS([ace/Reactor.h], [],
-                 [AC_MSG_ERROR([Unable to find header file Reactor.h])])
+#AC_CHECK_HEADERS([ace/Reactor.h], [],
+#                 [AC_MSG_ERROR([Unable to find header file Reactor.h])])
 
 # Checks for libraries.
-AC_SEARCH_LIBS([svc], [ACE], [], [
-  AC_MSG_ERROR([Unable to find svc()])
-])
+#AC_SEARCH_LIBS([svc], [ACE], [], [
+#  AC_MSG_ERROR([Unable to find svc()])
+#])
 
 AC_SEARCH_LIBS([readline], [readline], [], [
   AC_MSG_ERROR([Unable to find readline()])
