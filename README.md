@@ -17,3 +17,9 @@ ___
 ## Example
  - (Peace)# ping - Press enter
  - The Output will be PONG from Hostapd
+
+## How to Compile
+ - cd <vapsh>
+ - ./autogen.sh
+ - ./configure
+
