@@ -11,13 +11,11 @@ vapsh_SOURCES=src/readlineIF.cc \
 
 vapsh_CPPFLAGS=-Iinc \
                -I/usr/local \
-               -I/usr/local/readline-8.0-rc1/include \
-               -I/home/naushada/sw-packages/ACE_wrappers
+               -I/usr/local/ACE-6.5.0/include
 
 vapsh_CFLAGS=-g -Wall
 
-vapsh_LDFLAGS=-L/home/naushada/sw-packages/ACE_wrappers/lib \
-              -L/usr/local/readline-8.0-rc1/lib
+vapsh_LDFLAGS=-L/usr/localACE-6.5.0/lib
 
 vapsh_LDADD=-lACE -lreadline -lpthread -ltinfo
 
