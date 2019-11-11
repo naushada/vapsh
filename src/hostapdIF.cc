@@ -78,6 +78,13 @@ int HostapdCtrlIF::transmit(char *command)
       ACE_ERROR((LM_ERROR, "Sending of command len %d (%s) failed\n", strlen(command), command));
       perror("Send Failed:");
     }
+    else
+    {
+      /*Start Response Guard Timer now.*/
+      ACE_Time_Value to(1, 0);
+      ACE_Time_Value interval = ACE_Timer_Queue::zero;
+      ACE_Reactor::instance ()->schedule_timer(this, NULL, to, interval);
+    }
 
   }while(0);  
   
@@ -268,7 +275,9 @@ HostapdCtrlIF::HostapdCtrlIF(HostapdCtrlIF::CtrlIntfType_t ctrlIFType)
       /*Note: Right after registering handler, ACE Framework calls get_handle 
               to retrieve the handle. The handle is nothing but a fd 
               (File Descriptor).*/
-      ACE_Reactor::instance()->register_handler(this, ACE_Event_Handler::READ_MASK);
+      ACE_Reactor::instance()->register_handler(this,
+						ACE_Event_Handler::READ_MASK |
+						ACE_Event_Handler::TIMER_MASK);
     }
     else if(HostapdCtrlIF::UDP == ctrlIFType)
     {
@@ -288,7 +297,9 @@ HostapdCtrlIF::HostapdCtrlIF(HostapdCtrlIF::CtrlIntfType_t ctrlIFType)
       /*Note: Right after registering handler, ACE Framework calls get_handle 
               to retrieve the handle. The handle is nothing but a fd 
               (File Descriptor).*/
-      ACE_Reactor::instance()->register_handler(this, ACE_Event_Handler::READ_MASK);
+      ACE_Reactor::instance()->register_handler(this,
+						ACE_Event_Handler::READ_MASK |
+						ACE_Event_Handle::TIMER_MASK);
     }
     else
     {

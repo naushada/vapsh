@@ -51,6 +51,26 @@ class HostapdCtrlIF : public ACE_Event_Handler
     virtual int handle_close(ACE_HANDLE handle, ACE_Reactor_Mask mask);
     virtual ACE_HANDLE get_handle(void) const;
 
+    // Called when timer expires (TV stores the
+    // current time and ARG is the argument given
+    // when the handler was originally scheduled).
+    virtual int handle_timeout(const ACE_Time_Value &tv,const void *arg = 0);
+
+    // = Timer-based event handler methods
+    // Register a handler to expire at time DELTA.
+    // When DELTA expires the handle_timeout()
+    // method will be called with the current time
+    // and ARG as parameters.  If INTERVAL is > 0
+    // then the handler is reinvoked periodically
+    // at that INTERVAL.  DELTA is interpreted
+    // "relative" to the current time of day.
+    virtual void schedule_timer (ACE_Event_Handler *,
+				 const void *arg,
+				 const ACE_Time_Value &delta,
+				 const ACE_Time_Value &interval =ACE_Timer_Queue::zero);
+    // Locate and cancel timer.
+    virtual void cancel_timer (ACE_Event_Handler *);
+  
     /*Default constructor.*/
     HostapdCtrlIF();
     virtual ~HostapdCtrlIF();
