@@ -98,6 +98,7 @@ class HostapdCtrlIF : public ACE_Event_Handler
     ACE_LSOCK_CODgram  m_unixCODgram;
     CtrlIntfType_t  m_ctrlIntfType;
     HostapdTask  *m_hostapdTask;
+    long m_rspTimerId;
     
 };
 

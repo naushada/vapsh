@@ -83,7 +83,7 @@ int HostapdCtrlIF::transmit(char *command)
       /*Start Response Guard Timer now.*/
       ACE_Time_Value to(1, 0);
       ACE_Time_Value interval = ACE_Time_Value::zero;
-      ACE_Reactor::instance ()->schedule_timer(this, NULL, to, interval);
+      m_rspTimerId = ACE_Reactor::instance()->schedule_timer(this, NULL, to, interval);
     }
 
   }while(0);  
@@ -160,6 +160,13 @@ int HostapdCtrlIF::handle_close(ACE_HANDLE handle, ACE_Reactor_Mask mask)
   return(0);
 }
 
+/*
+ * @brief  This is the hook method for application to process the timer expiry. This is invoked by 
+ *         ACE Framework upon expiry of timer.
+ * @param  tv in sec and usec.
+ * @param  argument which was passed while starting the timer.
+ * @return 0 for success else for failure.
+ */
 int HostapdCtrlIF::handle_timeout(const ACE_Time_Value &tv, const void *arg)
 {
   ACE_DEBUG((LM_DEBUG, "Time is expired now\n"));
@@ -178,6 +185,7 @@ int HostapdCtrlIF::handle_input(ACE_HANDLE handle)
   size_t len = sizeof(buff);
   
   memset((void *)buff, 0, sizeof(buff));
+  ACE_Reactor::instance()->cancel_timer(this->m_rspTimerId);
 
   if(HostapdCtrlIF::UNIX == ctrlIntfType())
   {
