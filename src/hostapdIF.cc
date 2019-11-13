@@ -82,7 +82,7 @@ int HostapdCtrlIF::transmit(char *command)
     {
       /*Start Response Guard Timer now.*/
       ACE_Time_Value to(1, 0);
-      ACE_Time_Value interval = ACE_Timer_Queue::zero;
+      ACE_Time_Value interval = ACE_Time_Value::zero;
       ACE_Reactor::instance ()->schedule_timer(this, NULL, to, interval);
     }
 
@@ -158,6 +158,12 @@ int HostapdCtrlIF::handle_close(ACE_HANDLE handle, ACE_Reactor_Mask mask)
   }
 
   return(0);
+}
+
+int HostapdCtrlIF::handle_timeout(const ACE_Time_Value &tv, const void *arg)
+{
+  ACE_DEBUG((LM_DEBUG, "Time is expired now\n"));
+  return(0);	
 }
 
 /*
@@ -299,7 +305,7 @@ HostapdCtrlIF::HostapdCtrlIF(HostapdCtrlIF::CtrlIntfType_t ctrlIFType)
               (File Descriptor).*/
       ACE_Reactor::instance()->register_handler(this,
 						ACE_Event_Handler::READ_MASK |
-						ACE_Event_Handle::TIMER_MASK);
+						ACE_Event_Handler::TIMER_MASK);
     }
     else
     {

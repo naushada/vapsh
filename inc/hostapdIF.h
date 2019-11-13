@@ -31,6 +31,7 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #include <ace/LSOCK_Dgram.h>
 #include <ace/Task_T.h>
 #include <ace/UNIX_Addr.h>
+#include <ace/Timer_Queue_T.h>
 
 #include "readlineIF.h"
 
@@ -55,7 +56,7 @@ class HostapdCtrlIF : public ACE_Event_Handler
     // current time and ARG is the argument given
     // when the handler was originally scheduled).
     virtual int handle_timeout(const ACE_Time_Value &tv,const void *arg = 0);
-
+#if 0
     // = Timer-based event handler methods
     // Register a handler to expire at time DELTA.
     // When DELTA expires the handle_timeout()
@@ -67,10 +68,11 @@ class HostapdCtrlIF : public ACE_Event_Handler
     virtual void schedule_timer (ACE_Event_Handler *,
 				 const void *arg,
 				 const ACE_Time_Value &delta,
-				 const ACE_Time_Value &interval =ACE_Timer_Queue::zero);
+				 const ACE_Time_Value &interval = ACE_Time_Value::zero);
     // Locate and cancel timer.
     virtual void cancel_timer (ACE_Event_Handler *);
-  
+#endif
+
     /*Default constructor.*/
     HostapdCtrlIF();
     virtual ~HostapdCtrlIF();
